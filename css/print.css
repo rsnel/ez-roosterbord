@@ -1,0 +1,58 @@
+.noprint {
+	display: none;
+}
+.onlyprint {
+	display: inline;
+}
+a:link {
+	color: black;
+}
+a:visited {
+	color: black;
+}
+.unknown {
+	color: black;
+	font-weight: bold;
+}
+#content {
+	font-size: 11px;
+}
+.les table {
+	font-size: 11px;
+}
+.comment {
+	font-size: 9px;
+}
+.spacer {
+	height: 56px;
+}
+.uitval {
+	background-color: white;
+	font-weight: lighter;
+}
+.extra {
+	background-color: white;
+}
+.vrijstelling {
+	background-color: white;
+	font-weight: lighter;
+}
+.verplaatstnaar {
+	background-color: white;
+	font-weight: lighter;
+}
+.verplaatstnaar {
+	background-color: white;
+}
+.lokaalreservering {
+	background-color: white;
+}
+.gewijzigd {
+	background-color: white;
+}
+#footer {
+	font-size: 7px;
+}
+#leerlinglijst {
+	font-size: 8px;
+}

@@ -92,16 +92,16 @@ function html_end() {
 	$year = date('Y', $_SERVER['REQUEST_TIME']);
 	if ($year > substr($schooljaar_long, 0, 4)) $rooster_copy = str_replace('/', ', ', $schooljaar_long);
 	else $rooster_copy = $year;
-	$version_copy = '<a href="http://ez-roosterbord.nl/">ez-roosterbord</a>-'.exec('git describe').' &copy; '.substr(exec('git show -s --format=%ci'), 0, 4).' Rik Snel';
+	$version_copy = '-'.exec('git describe').' &copy; '.substr(exec('git show -s --format=%ci'), 0, 4).' Rik Snel';
 ?><p><div id="footer">
 <div class="noprint">
 Rooster &copy; <? echo($rooster_copy.' '.config('SCHOOL_VOLUIT')) ?>, all rights reserved. Favicon &copy; 1953 Konrad Jacobs, license <a href="http://creativecommons.org/licenses/by-sa/2.0/de/deed.en">CC-BY-SA-2.0-DE</a><br>
-Deze webinterface, <? echo($version_copy); ?> &lt;rik@snel.it&gt;. Powered by PHP <? echo(phpversion()); ?>.<br>
+Deze webinterface, <a href="http://ez-roosterbord.nl/">ez-roosterbord</a><? echo($version_copy); ?> &lt;rik@snel.it&gt;. Powered by PHP <? echo(phpversion()); ?>.<br>
 Released as <a href="http://www.gnu.org/philosophy/free-sw.html">free software</a> without warranties under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html">GNU AGPL v3</a>.<br>
 Sourcecode: <code>git clone <a href="https://github.com/rsnel/ez-roosterbord/">https://github.com/rsnel/ez-roosterbord/</a></code>.
 </div>
 <div class="onlyprint">
-Rooster &copy; <? echo($rooster_copy.' '.config('SCHOOL_VOLUIT')) ?>, all rights reserved, <? echo($version_copy) ?> is vrije software onder de GNU Affero GPL v3.
+Rooster &copy; <? echo($rooster_copy.' '.config('SCHOOL_VOLUIT')) ?>, all rights reserved, ez-roosterbord<? echo($version_copy) ?> is vrije software onder de GNU Affero GPL v3.
 </div>
 </div>
 </div>

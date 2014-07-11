@@ -362,10 +362,13 @@ EOT
 }
 
 function import_wijzigingen($file_id, $week, $tmp_name) {
-	global $wijz;
+	global $wijz, $stamz;
 	unset($GLOBALS['wijz']);
 	$wijz = array();
 	lock_renew_helper(1);
+
+	// fill stamz array, so stuff like 2A.2A1A can be changed to 2A1A
+	$stamz = mdb2_all_assoc_rekey('SELECT entities.entity_name, entities2.entity_name AS value FROM entities JOIN grp2grp ON grp2grp.lesgroep_id = entities.entity_id JOIN entities AS entities2 ON entities2.entity_id = grp2grp.lesgroep2_id AND entities2.entity_type = '.CATEGORIE.' WHERE entities.entity_type = '.STAMKLAS);
 
 	// als de roostermakers roosterwijzigingen wissen, dan zou de wijzigingenfile kleiner moeten worden
 	// zermelo doet overwrite zonder truncate, na het wissen van roosterwijzigingen kunnen secties dubbel
@@ -479,19 +482,13 @@ register_shutdown_function('shutdown_function');
 if (!lock_acquire('{ "state": 1, "perc": 0 }', $_POST['randid'])) fatal_error('er is al een update bezig, even geduld AUB');
 
 // cache contents of table entities
-$res =& mdb2_query('SELECT entity_name, entity_id, entity_type FROM entities');
-$entities = $res->fetchAll(MDB2_FETCHMODE_ORDERED, true);
-$res->free();
+$entities = mdb2_all_ordered_rekey('SELECT  entity_name, entity_id, entity_type FROM entities');
 
 // cache een lijst leerlingen van wie we de naam al weten
-$res =& mdb2_query('SELECT entity_id, name FROM names');
-$names = $res->fetchAll(MDB2_FETCHMODE_ORDERED, true);
-$res->free();
+$names = mdb2_all_ordered_rekey('SELECT entity_id, name FROM names');
 
 // cache een lijst met zermelo_id's
-$res =& mdb2_query('SELECT zermelo_id_orig, zermelo_id FROM zermelo_ids');
-$zermelo_ids = $res->fetchAll(MDB2_FETCHMODE_ORDERED, true);
-$res->free();
+$zermelo_ids = mdb2_all_assoc_rekey('SELECT zermelo_id_orig, zermelo_id FROM zermelo_ids');
 
 $stamz = array();
 

@@ -451,15 +451,15 @@ switch ($_FILES['uploadedfile']['error']) {
 	case UPLOAD_ERR_INI_SIZE:
 		fatal_error('ge-uploade file te groot volgens php.ini');
 	case UPLOAD_ERR_FORM_SIZE:
-		fatal_error('ge-uploade file te groot volgens policy van roosterphp');
+		fatal_error('ge-uploade file te groot volgens policy van php op deze server');
 	case UPLOAD_ERR_PARTIAL:
 		fatal_error('upload mislukt, file slechts gedeeltelijk aangekomen');
 	case UPLOAD_ERR_NO_FILE:
 		fatal_error('er is geen file geupload, omdat er geen geselecteerd was');
 	case UPLOAD_ERR_NO_TMP_DIR:
-		fatal_error('kan de file nergens kwijt, Rik moet vragen aan Gert');
+		fatal_error('kan de file nergens kwijt, neem contact op met de beheerder');
 	case UPLOAD_ERR_CANT_WRITE:
-		fatal_error('schijf vol?, Rik moet vragen aan Gert');
+		fatal_error('schijf vol?, vraag de beheerder om meer ruimte');
 	case UPLOAD_ERR_OK:
 		break;
 	default:

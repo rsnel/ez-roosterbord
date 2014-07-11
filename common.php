@@ -6,7 +6,7 @@
 // you can use this, to host multiple instances from the same sourcedirectory
 
 $config_file = 'config.php'; // default config file
-$config_key = isset($_SERVER['ROOSTERPHP_CONFIG_KEY'])?$_SERVER['ROOSTERPHP_CONFIG_KEY']:'';
+$config_key = isset($_SERVER['EZ_ROOSTERBORD_CONFIG_KEY'])?$_SERVER['EZ_ROOSTERBORD_CONFIG_KEY']:'';
 if ($config_key != '') $config_file = 'config_'.$config_key.'.php';
 
 // logging depends on values in the config file, so we report the error 'by hand'

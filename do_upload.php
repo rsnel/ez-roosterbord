@@ -497,7 +497,7 @@ $stamz = array();
 
 function move_upload($bw, $md5, $week) {
 	$new_filename = config('DATADIR').$md5;
-	//logit('we slaan de upload op als '.$new_filename);
+	logit($_FILES['uploadedfile']['name'].' -> '.$md5);
 	if (!move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $new_filename)) {
 		logit('unable to store uploaded file for future reference');
 	}
@@ -535,6 +535,7 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 	if (!mdb2_single_val("SELECT rooster_id FROM roosters WHERE basis_id = $basis_id AND file_id = $file_id AND wijz_id = $wijz_id")) {
 		$wijz_id++;
 		mdb2_exec("INSERT INTO roosters ( week_id, file_id, basis_id, wijz_id, timestamp ) VALUES ( $week_id, $file_id, $basis_id, $wijz_id, %i )", time());
+		logit($md5.' week='.$week.' basis_id='.$basis_id.' wijz_id='.$wijz_id);
 	} else fatal_error('deze wijzigigen hebben we al op deze week bij het meest recente basisrooster dat geldt voor deze week');
 		
 
@@ -574,9 +575,8 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 	// zijn wijzigingen ingelezen) dan moet er geen update worden geregistreerd
 	$basis_id++;
 	mdb2_exec("INSERT INTO roosters ( week_id, file_id, basis_id, wijz_id, timestamp ) VALUES ( %i, $file_id, $basis_id, 0, %i )", $_POST['week_id'], time());
+	logit($md5.' week='.$week.' basis_id='.$basis_id.' wijz_id=0');
 } else fatal_error('filename niet herkend, we verwachten een file van de vorm Schooljaar 2013-2014_234.udmz (basisrooster) of roosterwijzigingen_wk39.txt (wijzigingen)');
-
-logit("alles is goed gegaan");
 
 // lock automatically released in shutdown function
 ?>

@@ -496,7 +496,7 @@ $res->free();
 $stamz = array();
 
 function move_upload($bw, $md5, $week) {
-	$new_filename = config('DATADIR').$bw.'-'.$week.'-'.$md5.'.'.(($bw == 'basis')?'udmz':'txt');
+	$new_filename = config('DATADIR').$md5;
 	//logit('we slaan de upload op als '.$new_filename);
 	if (!move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $new_filename)) {
 		logit('unable to store uploaded file for future reference');

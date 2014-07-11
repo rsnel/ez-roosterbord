@@ -6,14 +6,16 @@ $res = mdb2_single_assoc("SELECT * FROM files WHERE file_id = %i", $_GET['file_i
 
 if ($res === NULL) fatal_error('file met file_id="'.$_GET['file_id'].'" niet gevonden');
 
-$local_filename = config('DATADIR').(($res['file_type'] == 1)?'basis':'wijz').'-'.$res['file_md5'].'.txt';
-header('Content-type: text/plain; charset='.config('ZERMELO_ENCODING'));
-header('Content-disposition: inline; filename='.$res[file_name]);
+$local_filename = config('DATADIR').$res['file_md5'];
 
-if (readfile($local_filename) === false) {
-	header('HTTP/1.0 404 Not Found');
-	header_remove('Content-disposition');
-	header_remove('Content-type');
-	echo('<html><head><title>Error 404 Not Found</title></head><body><h1>Error 404</h1><p>Gevraagde file is er niet ?!?!?</body></html>');
-}
+if (!is_readable($local_filename)) fatal_error("file $local_filename is not readable (doesn't exist/wrong permissions)");
+
+if ($res['file_type'] == 2)
+	header('Content-type: text/plain; charset='.config('ZERMELO_ENCODING'));
+else if ($res['file_type'] == 1)
+	header('Content-type: application/gzip');
+
+header('Content-disposition: inline; filename='.$res[file_name]);
+readfile($local_filename);
+
 ?>

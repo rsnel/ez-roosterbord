@@ -87,16 +87,21 @@ weeknummer:
 </form></div>
 <? }
 
-function html_end() { ?>
-<p><div id="footer">
+function html_end() {
+	$schooljaar_long = config('SCHOOLJAAR_LONG');
+	$year = date('Y', $_SERVER['REQUEST_TIME']);
+	if ($year > substr($schooljaar_long, 0, 4)) $rooster_copy = str_replace('/', ', ', $schooljaar_long);
+	else $rooster_copy = $year;
+	$version_copy = '<a href="http://ez-roosterbord.nl/">ez-roosterbord</a>-'.exec('git describe').' &copy; '.substr(exec('git show -s --format=%ci'), 0, 4).' Rik Snel';
+?><p><div id="footer">
 <div class="noprint">
-Rooster &copy; 2014 <? echo(config('SCHOOL_VOLUIT')) ?>, all rights reserved. Favicon &copy; 1953 Konrad Jacobs, license <a href="http://creativecommons.org/licenses/by-sa/2.0/de/deed.en">CC-BY-SA-2.0-DE</a><br>
-Deze webinterface, <a href="http://ez-roosterbord.nl/">ez-roosterbord.nl</a>, &copy; 2014 Rik Snel &lt;rik@snel.it&gt;. Powered by PHP <? echo(phpversion()); ?>.<br>
+Rooster &copy; <? echo($rooster_copy.' '.config('SCHOOL_VOLUIT')) ?>, all rights reserved. Favicon &copy; 1953 Konrad Jacobs, license <a href="http://creativecommons.org/licenses/by-sa/2.0/de/deed.en">CC-BY-SA-2.0-DE</a><br>
+Deze webinterface, <? echo($version_copy); ?> &lt;rik@snel.it&gt;. Powered by PHP <? echo(phpversion()); ?>.<br>
 Released as <a href="http://www.gnu.org/philosophy/free-sw.html">free software</a> without warranties under <a href="http://www.fsf.org/licensing/licenses/agpl-3.0.html">GNU AGPL v3</a>.<br>
-Sourcecode: subversion co <a href="http://penta.snel.it/svn/misc/trunk/roosterphp/">http://penta.snel.it/svn/misc/trunk/roosterphp/</a>.
+Sourcecode: <code>git clone <a href="https://github.com/rsnel/ez-roosterbord/">https://github.com/rsnel/ez-roosterbord/</a></code>.
 </div>
 <div class="onlyprint">
-Rooster &copy; <? echo(config('SCHOOL_VOLUIT')) ?> 2014, all rights reserved, ez-roosterbord.nl &copy; 2014 Rik Snel is vrije software onder de GNU Affero GPL v3.
+Rooster &copy; <? echo($rooster_copy.' '.config('SCHOOL_VOLUIT')) ?>, all rights reserved, <? echo($version_copy) ?> is vrije software onder de GNU Affero GPL v3.
 </div>
 </div>
 </div>
@@ -115,10 +120,8 @@ function entity_prevnext($name, $type) {
 }
 
 $PID = getmypid();
-$logsource = "index.php($PID)";
 
 /* een gebruiker wil kennelijk het rooster zien.... */
-
 
 $min_week_id = mdb2_single_val("SELECT MIN(week_id) FROM roosters");
 if ($min_week_id) {

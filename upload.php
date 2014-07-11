@@ -176,6 +176,11 @@ else { ?>
 
 <h3>Alle roosteruploads</h3>
 <? mdb2_res_table($res_geupload); ?>
+
+<h3>Logfile</h3>
+
+Toegang tot de <a href="getlog.php?secret=<? echo($_GET['secret']) ?>">logfile</a>.
+
 <div id="dialog_udmz" style="display: none" title="Roosterupload">
 <div class="progressbar"><div class="progress-label" style=" position: absolute;
 left: 50%;

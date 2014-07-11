@@ -1,6 +1,8 @@
 <?
 /* Copyright (c) Rik Snel 2011, license GNU AGPLv3 */
 
+require_once('mdb2_utils.php');
+
 // select configfile on the basis of the value of $_SERVER['ROOSTERPHP_CONFIG_KEY']
 // if not set, use config.php, otherwise use config_VALUE.php
 // you can use this, to host multiple instances from the same sourcedirectory
@@ -16,9 +18,25 @@ if (!file_exists($config_file)) {
 }
 
 require_once($config_file);
-require_once('mdb2_utils.php');
+
+// controleer of alle verplichte velden in de configfile aanwezig zijn
+foreach (array('UPLOAD_SECRET', 'DSN', 'DATADIR', 'LOGFILE', 'TIMEZONE',
+		'INTERNAL_IPS', 'SCHOOL_VOLUIT', 'SCHOOL_AFKORTING',
+		'ZERMELO_CATEGORY_IGNORE', 'ZERMELO_GROUP_IGNORE', 'ZERMELO_ENCODING') as $key) 
+	if (!isset($config[$key])) {
+		echo("mandatory key $key is missing in $config_file");
+		exit;
+	}
+
+if (!is_writable(config('DATADIR'))) {
+	echo(config('DATADIR').' cannot be written to by the webserver');
+	exit;
+}
 
 date_default_timezone_set(config('TIMEZONE'));
+
+// we assume all config info is there, for missing configuration items in the database (table config)
+// defaults are provided
 
 define('LEERLING', 1);
 define('DOCENT', 2);

@@ -126,7 +126,7 @@ function addslash($string) {
 	return '/'.$string;
 }
 
-function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie = NULL) {
+function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
 	$dag = ($dag0 == '')?0:get_dag($dag0);
 	$uur = ($uur0 == '')?0:(($separator == '/')?get_uur($uur0):get_uur_udmz($uur0));
 	$lesgroepen1 = implode(',', $lesgroepen = array_map('cleanup_lesgroepen', explode_and_sort($separator, $lesgroepen0)));
@@ -350,10 +350,10 @@ EOT
 
 	foreach ($udmz['Les'] as $id => $row) {
 		incdone($done, $total, 2);
-		if (!checkset($row, 'Les', array('Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok'))) return;
+		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok'))) return;
 
 		if (!($zermelo_id = add_zermelo_id($id))) return;
-		insert_les(',', $zermelo_id, $row['Dag'], $row['Uur'], $row['Vak'], $row['Grp'], $row['Doc'], $row['Lok'], $file_id);
+		insert_les(',', $zermelo_id, $row['Dag'], $row['Uur'], $row['Vak'], $row['Grp'], $row['Doc'], $row['Lok'], $file_id, $row['#WijzigComment']);
 	}
 
 	// als we hier zijn, dan is alles goed gegaan

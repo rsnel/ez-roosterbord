@@ -839,6 +839,8 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 			} else if (!$week_info[$j] && $_GET['bw'] != 'b' && $_GET['bw'] != 'x') { // deze dag valt uit
 				$extra = ' vrijstelling';
 				$comment = '(vrijstelling)';
+			} else { // dit is een gewone les
+				if ($row[NOTITIE]) $comment = ' ('.$row[NOTITIE].')';
 			}
 
 			$info = array();

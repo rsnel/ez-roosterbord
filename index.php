@@ -367,32 +367,40 @@ define('DAG2', 14);
 define('UUR2', 15);
 define('NOTITIE2', 16);
 define('VIS', 17);
+define('VIS2', 18);
 
-function rquery_inner($entity_ids, $id1, $id2, $left, $wijz) {
+function rquery_inner($entity_ids1, $entity_ids2, $id1, $id2, $left, $wijz) {
 	//echo("entity_ids = $entity_ids, id1 = $id1, id2 = $id2, left = $left, wijz = $wijz");
-	if ($entity_ids === '') $entity_ids = 'NULL';
-	else if (!$entity_ids) return<<<EOQ
-SELECT DISTINCT f2l.les_id f_id, l2f.les_id s_id, f2l.zermelo_id f_zid, l2f.zermelo_id s_zid, 1 vis, $wijz wijz
+	if ($entity_ids1 === '') $entity_ids1 = 'NULL';
+	if ($entity_ids2 === '') $entity_ids2 = 'NULL';
+	else if (!$entity_ids1 || !$entity_ids2) return<<<EOQ
+SELECT DISTINCT f2l.les_id f_id, l2f.les_id s_id, f2l.zermelo_id f_zid, l2f.zermelo_id s_zid, 1 vis, 1 vis2, $wijz wijz
 FROM files2lessen AS f2l
 {$left}JOIN files2lessen AS l2f ON f2l.zermelo_id = l2f.zermelo_id AND l2f.file_id = $id2
 WHERE f2l.file_id = $id1
 EOQ;
 	return <<<EOQ
-SELECT DISTINCT f2l.les_id f_id, l2f.les_id s_id, f2l.zermelo_id f_zid, l2f.zermelo_id s_zid, CASE WHEN l2e.entity_id > 0 THEN 1 ELSE 0 END AS vis, $wijz wijz
+SELECT DISTINCT f2l.les_id f_id, l2f.les_id s_id, f2l.zermelo_id f_zid, l2f.zermelo_id s_zid,
+	CASE WHEN l2e.entity_id > 0 THEN 1 ELSE 0 END AS vis,
+	CASE WHEN l2e2.entity_id > 0 THEN 1 ELSE 0 END AS vis2,
+	$wijz wijz
 FROM files2lessen AS f2l
 JOIN entities2lessen AS e2l ON e2l.les_id = f2l.les_id
 {$left}JOIN files2lessen AS l2f ON f2l.zermelo_id = l2f.zermelo_id AND l2f.file_id = $id2
-LEFT JOIN entities2lessen AS l2e ON l2f.les_id = l2e.les_id AND l2e.entity_id IN ($entity_ids)
-WHERE f2l.file_id = $id1 AND e2l.entity_id IN ($entity_ids)
+LEFT JOIN entities2lessen AS l2e ON l2f.les_id = l2e.les_id AND l2e.entity_id IN ($entity_ids1)
+LEFT JOIN entities2lessen AS l2e2 ON l2f.les_id = l2e2.les_id AND l2e2.entity_id IN ($entity_ids2)
+WHERE f2l.file_id = $id1 AND e2l.entity_id IN ($entity_ids1)
 EOQ;
 }
 
-function rquery($entity_ids, $id1, $id2, $left) {
-	return rquery_inner($entity_ids, $id1, $id2, $left, 0).
-		"\nUNION ALL\n".rquery_inner($entity_ids, $id2, $id1, 'LEFT ', 1);
+function rquery($entity_ids1, $entity_ids2, $id1, $id2, $left) {
+	return rquery_inner($entity_ids1, $entity_ids2, $id1, $id2, $left, 0).
+		"\nUNION ALL\n".rquery_inner($entity_ids2, $entity_ids1, $id2, $id1, 'LEFT ', 1);
 }
 
 $multiple_sort = '';
+
+$safe_id_wijz = NULL; // used if 'wijz' is another basis
 
 switch ($entity_type) {
 case LESGROEP:
@@ -445,10 +453,25 @@ SELECT lesgroep_id FROM grp2grp
 WHERE file_id_basis = {$basis['file_id']} AND lesgroep2_id IN ( $safe_id )
 EOQ
 );
+
+	if ($_GET['bw'] == 'x') {
+		$result3 = mdb2_query(<<<EOQ
+SELECT lesgroep_id FROM grp2grp
+WHERE file_id_basis = {$wijz['file_id']} AND lesgroep2_id IN ( $safe_id )
+EOQ
+);
+	}
+
 	// van groepen met leerlingen laten we de roosters van alle gerelateerde groepen
 	// ook zien, van een lege groep alleen het rooster van de groep zelf
 	$entity_ids = $result2->fetchCol();
 	if (count($entity_ids) && !config('HIDE_STUDENTS')) $safe_id = implode(',', $entity_ids);
+
+	if ($_GET['bw'] == 'x') {
+		$entity_ids = $result3->fetchCol();
+		if (count($entity_ids) && !config('HIDE_STUDENTS')) $safe_id_wijz = implode(',', $entity_ids);
+	}
+
 	break;
 case LEERLING:
 	if ($entity_multiple) {
@@ -456,6 +479,11 @@ case LEERLING:
 		$type .= 'onderstaande leerlingen';
 		$result2 = mdb2_query("SELECT entity_id FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$basis['file_id']}");
 		while ($row = $result2->fetchRow()) $entity_ids[] = $row[0];
+
+		if ($_GET['bw'] == 'x') {
+			$result3 = mdb2_query("SELECT entity_id FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$wijz['file_id']}");
+			while ($row = $result3->fetchRow()) $entity_ids_wijz[] = $row[0];
+		}
 		
 		if (binnen_school()) {
 			$lln = mdb2_query(<<<EOT
@@ -499,9 +527,18 @@ EOT;
 			$entity_ids[] = $row[0];
 			$type .= ' '.make_link($row[1]);
 		}
+		if ($_GET['bw'] == 'x') {
+			$result3 = mdb2_query("SELECT entity_id, entity_name FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$wijz['file_id']} -- AND entity_type != ".CATEGORIE);
+			while ($row = $result3->fetchRow()) {
+				$entity_ids_wijz[] = $row[0];
+			}
+		}
 	}
 
 	$safe_id = implode(',', $entity_ids);
+	if ($_GET['bw'] == 'x') {
+		$safe_id_wijz = implode(',', $entity_ids_wijz);
+	}
 	break;
 case VAK:
 	if ($entity_multiple) $type = 'vakken '.split_links($entity_name);
@@ -534,7 +571,7 @@ default:
 //$basis['file_id'] = 7;
 //$wijz['file_id'] = 8;
 
-$subquery = rquery($safe_id, $basis['file_id'], ($_GET['bw'] == 'b')?0:$wijz['file_id'], ($_GET['bw'] == 'y')?'':'LEFT ');
+$subquery = rquery($safe_id, $safe_id_wijz?$safe_id_wijz:$safe_id, $basis['file_id'], ($_GET['bw'] == 'b')?0:$wijz['file_id'], ($_GET['bw'] == 'y')?'':'LEFT ');
 
 //echo($subquery);
 //$res_test = mdb2_query($subquery);
@@ -546,7 +583,7 @@ SELECT f_zid, f.lesgroepen AS f_lesgroepen, f.vakken AS f_vakken,
 	f.dag AS f_dag, f.uur AS f_uur, f.notitie AS f_notitie, wijz,
 	s_zid, s.lesgroepen AS s_lesgroepen, s.vakken AS s_vakken,
 	s.docenten AS s_docenten, s.lokalen AS s_lokalen,
-	s.dag AS s_dag, s.uur AS s_uur, s.notitie AS s_notitie, vis
+	s.dag AS s_dag, s.uur AS s_uur, s.notitie AS s_notitie, vis, vis2
 FROM ( $subquery ) AS sub
 JOIN lessen AS f ON f.les_id = f_id
 LEFT JOIN lessen AS s ON s.les_id = s_id
@@ -753,7 +790,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 			$extra = ''; $comment = '';
 			
 			if ($row[WIJZ_ID]) { // deze les is: extra/nieuw, lokaalreservering, (fake)verplaatstvan of gewijzigd
-				if (!$row[DAG2]) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
+				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
 					if ($row[VAKKEN] == 'lok') {
 						$row[VAKKEN] = '';
 						$extra = ' lokaalreservering';
@@ -793,7 +830,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 					}
 				}
 			} else if ($row[BASIS_ID2] || ($_GET['bw'] == 'x') && $wijz['file_id']) { // dit is uitval,vrijstelling,(fake)verplaatstnaar,gewijzigd 
-				if (!$row[DAG2]) { // bij deze les hoort geen nieuwe les, dus uitval/vrijstelling/fakeverplaatstnaar
+				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen nieuwe les, dus uitval/vrijstelling/fakeverplaatstnaar
 					// is deze les al aan de orde geweest bij een verplaatsing?
 					// zo ja, dan skippen we deze les
 					if (isset($dubbel[$row[BASIS_ID]])) {

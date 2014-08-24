@@ -1,7 +1,7 @@
 <? require_once('common.php');
 
 function html_start($collapsed = false) {
-	global $entity_type, $entity_multiple, $entity_name, $weken, $safe_week, $link_tail_wowk, $prev_week, $next_week, $no_berichten, $default_week;
+	global $entity_type, $entity_multiple, $entity_name, $weken, $safe_week, $link_tail_wowk, $link_tail_tail, $prev_week, $next_week, $no_berichten, $default_week;
 	header("Content-Type: text/html; charset=UTF-8"); ?>
 <!DOCTYPE HTML>
 <html>
@@ -55,6 +55,7 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 } ?>
 <input name="bw" type="hidden" value="<? echo($_GET['bw']) ?>">
 <input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">
+<? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 <? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP)) { ?>
  <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">&gt;Klassenboek&lt;</a>
 <? }  else if (!$entity_multiple && $entity_type == LEERLING) { ?>
@@ -65,7 +66,7 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 </form></div>
 <div class="noprint" style="float: right"><form method="GET" name="basisweek" accept-charset="UTF-8">
 weeknummer:
-<? echo(($prev_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$prev_week.'">&lt;</a>':'<del>&lt;</del>'); ?><select onchange="document.basisweek.submit()" name="wk">
+<? echo(($prev_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$prev_week.$link_tail_tail.'">&lt;</a>':'<del>&lt;</del>'); ?><select onchange="document.basisweek.submit()" name="wk">
 <? foreach ($weken as $week) {
 	echo('<option');
 	if ($safe_week == $week) echo(' selected');
@@ -73,7 +74,7 @@ weeknummer:
 	if ($default_week != $week) echo($week);
 	echo('">'.$week.'</option>');
 } ?>
-</select><? echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.'">&gt;</a>':'<del>&gt;</del>'); ?>
+</select><? echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>'); ?>
 <!-- <input onclick="document.basisweek.submit()" type="radio" <? if ($_GET['bw'] == 'b') echo('checked ') ?>name="bw" value="b">basisrooster
 <input onclick="document.basisweek.submit()" type="radio" <? if ($_GET['bw'] == 'w') echo('checked ') ?>name="bw" value="w">weekrooster -->
 <select onchange="document.basisweek.submit()" name="bw">
@@ -84,6 +85,7 @@ weeknummer:
 <option <? if ($_GET['bw'] == 'x') echo('selected ') ?>value="x">basisrooster tov vorige week</option>
 </select>
 <input name="q" type="hidden" value="<? echo(htmlenc($_GET['q'])) ?>">
+<? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 </form></div>
 <? }
 
@@ -208,9 +210,10 @@ if ($safe_week != $_GET['wk']) fatal_error('sanity check failed');
 
 // $_GET['bw'] is already sanitized at this point
 $link_tail_wowk = '&amp;bw='.$_GET['bw'].'&amp;wk=';
+$link_tail_tail = (isset($_GET['debug'])?'&amp;debug':'');
 
-if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week.'">';
-else $link_tail = $link_tail_wowk.'">';
+if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week.$link_tail_tail.'">';
+else $link_tail = $link_tail_wowk.$link_tail_tail.'">';
 
 if (!isset($_GET['q'])) $_GET['q'] = '';
 else $_GET['q'] = trim($_GET['q']);
@@ -742,6 +745,7 @@ if ($entity_type == STAMKLAS || $entity_type == LESGROEP || $entity_type == LEER
 <form method="GET" name="leerling" accept-charset="UTF-8">
 <input type="hidden" name="bw" value="<? echo($_GET['bw']) ?>">
 <input type="hidden" name="wk" value="<? echo($safe_week) ?>">
+<? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 <? }
 
 if ($_GET['q']) {

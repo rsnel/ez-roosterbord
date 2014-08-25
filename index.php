@@ -524,24 +524,51 @@ EOT;
 		else $type = 'leerling '.htmlenc($entity_name);
 
 		// we maken voor deze leerling ook een lijst met lesgroepen
-		$result2 = mdb2_query("SELECT entity_id, entity_name FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$basis['file_id']} -- AND entity_type != ".CATEGORIE);
-		$type .= ', groepen: '; $entity_ids = array();
-		while ($row = $result2->fetchRow()) {
-			$entity_ids[] = $row[0];
-			$type .= ' '.make_link($row[1]);
-		}
+		$type .= ', groepen:';
+		$entity_ids = array();
 		if ($_GET['bw'] == 'x') {
-			$result3 = mdb2_query("SELECT entity_id, entity_name FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$wijz['file_id']} -- AND entity_type != ".CATEGORIE);
-			while ($row = $result3->fetchRow()) {
-				$entity_ids_wijz[] = $row[0];
+			// filter out double rows in second part of 'UNION ALL',
+			// this way we don't get duplicate rows
+			$result3 = mdb2_query(<<<EOQ
+SELECT bla.lesgroep_id, bla.old, bla.new, entity_name 
+FROM (
+	SELECT grp2ppl.lesgroep_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$wijz['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.ppl_id IN ( $safe_id )
+	AND grp2ppl.file_id_basis = {$basis['file_id']} 
+	UNION ALL
+	SELECT grp2ppl.lesgroep_id, 0 old, 1 new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$basis['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.ppl_id IN ( $safe_id )
+	AND grp2ppl.file_id_basis = {$wijz['file_id']} 
+	AND grp2ppl2.lesgroep_id IS NULL
+) bla
+JOIN entities ON entities.entity_id = bla.lesgroep_id
+EOQ
+			);
+			//mdb2_res_table($result3);
+			$entity_ids_wijz = array();
+			while ($row = $result3->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+				if ($row['old']) {
+					$entity_ids[] = $row['lesgroep_id'];
+					if ($row['new']) $type .= ' '.make_link($row['entity_name']);
+					else $type .= ' <del>'.make_link($row['entity_name']).'</del>';
+				} else $type .= ' <ins>'.make_link($row['entity_name']).'</ins>';
+				if ($row['new']) $entity_ids_wijz[] = $row['lesgroep_id'];
+			}
+			$safe_id_wijz = implode(',', $entity_ids_wijz);
+		} else {
+			$result2 = mdb2_query("SELECT entity_id, entity_name FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$basis['file_id']} -- AND entity_type != ".CATEGORIE);
+			while ($row = $result2->fetchRow()) {
+				$entity_ids[] = $row[0];
+				$type .= ' '.make_link($row[1]);
 			}
 		}
 	}
 
 	$safe_id = implode(',', $entity_ids);
-	if ($_GET['bw'] == 'x') {
-		$safe_id_wijz = implode(',', $entity_ids_wijz);
-	}
 	break;
 case VAK:
 	if ($entity_multiple) $type = 'vakken '.split_links($entity_name);

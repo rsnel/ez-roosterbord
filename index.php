@@ -410,8 +410,8 @@ case LESGROEP:
 case STAMKLAS:
 case CATEGORIE:
 	// we maken voor deze lesgroep(en)/stamklas(sen) ook een selectbox met leerlingen
-	$options_name = ', leerlingen: ';
 	$options = '<option selected value="'.htmlenc($_GET['q']).'"></option>';
+	$qs = array();
 	if ($_GET['bw'] != 'x') {
 		if (binnen_school()) {
 			$result2 = mdb2_query(<<<EOT
@@ -427,6 +427,7 @@ ORDER BY surname, firstname, prefix
 EOT
 , STAMKLAS);
 			while ($row = $result2->fetchRow(MDB2_FETCHMODE_ORDERED)) {
+				$qs[] = $row[0];
 				$options .= '<option value="'.htmlenc($row[0]).'">'.htmlenc($row[1].' ('.$row[2].'/'.$row[0].')').'</option>'."\n";
 			}
 		} else {
@@ -439,6 +440,7 @@ ORDER BY CAST(entity_name AS UNSIGNED INTEGER)
 EOT;
 			$result2 = mdb2_query($query2);
 			while ($row = $result2->fetchRow()) {
+				$qs[] = $row[0];
 				$options .= '<option class="llnrs">'.htmlenc($row[0]).'</option>'."\n";
 			}
 		}
@@ -470,6 +472,7 @@ EOT
 					if ($row['new']) $arrow = '';
 					else $arrow = ' &#8594;';
 				} else $arrow = ' &#8592;';
+				$qs[] = $row['entity_name'];
 				$options .= '<option value="'.htmlenc($row['entity_name']).'">'.htmlenc($row['name'].' ('.$row['entity_name'].')').$arrow.'</option>'."\n";
 			}
 		} else {
@@ -498,11 +501,13 @@ EOT;
 					if ($row['new']) $arrow = '';
 					else $arrow = ' &#8594;';
 				} else $arrow = ' &#8592;';
+				$qs[] = $row['entity_name'];
 				$options .= '<option value="'.htmlenc($row['entity_name']).'" class="llnrs">'.htmlenc($row['entity_name']).$arrow.'</option>'."\n";
 			}
 		}
 	}
 
+	$options_name = ', '.make_link(implode(',', $qs), 'leerlingen').': ';
 	if ($entity_multiple) {
 		$type = 'groepen '.split_links($entity_name); 
 		$multiple_sort = ', f_lesgroepen';
@@ -591,8 +596,9 @@ FROM (
 	AND grp2ppl2.lesgroep_id IS NULL
 ) bla
 JOIN entities ON entities.entity_id = bla.lesgroep_id
+ORDER BY CASE WHEN entity_type = %i THEN 0 WHEN entity_type = %i THEN 1 ELSE 2 END, entity_name
 EOQ
-				);
+				, CATEGORIE, STAMKLAS);
 				//mdb2_res_table($result3);
 				$subscript .= '<td>';
 				while ($row2 = $result3->fetchRow(MDB2_FETCHMODE_ASSOC)) {
@@ -604,10 +610,12 @@ EOQ
 				}
 				$subscript .= '</td>';
 			} else {
-				$grps = mdb2_query("SELECT entity_name FROM grp2ppl JOIN entities ON entities.entity_id = grp2ppl.lesgroep_id WHERE ppl_id = {$row[0]} AND file_id_basis = {$basis['file_id']} ORDER BY entity_type DESC, entity_name");
+				$grps = mdb2_query("SELECT entity_name FROM grp2ppl JOIN entities ON entities.entity_id = grp2ppl.lesgroep_id WHERE ppl_id = {$row[0]} AND file_id_basis = {$basis['file_id']} ORDER BY CASE WHEN entity_type = ".CATEGORIE." THEN 0 WHEN entity_type = ".STAMKLAS." THEN 1 ELSE 2 END, entity_name");
+				$subscript .= '<td>';
 				while (($row2 = $grps->fetchRow())) {
-					$subscript .= '<td>'.make_link($row2[0]).'</td>';
+					$subscript .= ' '.make_link($row2[0]);
 				}
+				$subscript .= '</td>';
 			}
 
 			$subscript .= '</tr>';
@@ -625,7 +633,7 @@ EOQ
 			// filter out double rows in second part of 'UNION ALL',
 			// this way we don't get duplicate rows
 			$result3 = mdb2_query(<<<EOQ
-SELECT bla.lesgroep_id, bla.old, bla.new, entity_name 
+SELECT bla.lesgroep_id, bla.old, bla.new, entity_name
 FROM (
 	SELECT grp2ppl.lesgroep_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
 	FROM grp2ppl
@@ -641,8 +649,9 @@ FROM (
 	AND grp2ppl2.lesgroep_id IS NULL
 ) bla
 JOIN entities ON entities.entity_id = bla.lesgroep_id
+ORDER BY CASE WHEN entity_type = %i THEN 0 WHEN entity_type = %i THEN 1 ELSE 2 END, entity_name
 EOQ
-			);
+			, CATEGORIE, STAMKLAS);
 			//mdb2_res_table($result3);
 			$entity_ids_wijz = array();
 			while ($row = $result3->fetchRow(MDB2_FETCHMODE_ASSOC)) {
@@ -655,7 +664,7 @@ EOQ
 			}
 			$safe_id_wijz = implode(',', $entity_ids_wijz);
 		} else {
-			$result2 = mdb2_query("SELECT entity_id, entity_name FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$basis['file_id']} -- AND entity_type != ".CATEGORIE);
+			$result2 = mdb2_query("SELECT entity_id, entity_name FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$basis['file_id']} ORDER BY CASE WHEN entity_type = ".CATEGORIE." THEN 0 WHEN entity_type = ".STAMKLAS." THEN 1 ELSE 2 END, entity_name");
 			while ($row = $result2->fetchRow()) {
 				$entity_ids[] = $row[0];
 				$type .= ' '.make_link($row[1]);

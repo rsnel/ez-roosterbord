@@ -234,10 +234,9 @@ if ($_GET['bw'] != 'x') {
 } else {
 	$wijz = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id = $week_id AND wijz_id = 0 ORDER BY rooster_id DESC LIMIT 1");
 	if (!$wijz) {
-		//fatal_error("impossible: toch geen basisrooster in deze week?!?!?!?, HUMBUG");
-		$basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $week_id AND wijz_id = 0 ORDER BY rooster_id DESC");
-		$wijz = array();
-		$wijz['file_id'] = 0;
+		// als er in een week geen basisrooster staat (dus impliciet een oud basisrooster)
+		// dan zijn $basis en $wijz gelijk
+		$wijz = $basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $week_id AND wijz_id = 0 ORDER BY rooster_id DESC");
 	} else {
 		$basis = array();
 		if ($real_prev_week) {

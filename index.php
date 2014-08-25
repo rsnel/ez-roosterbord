@@ -412,8 +412,9 @@ case CATEGORIE:
 	// we maken voor deze lesgroep(en)/stamklas(sen) ook een selectbox met leerlingen
 	$options_name = ', leerlingen: ';
 	$options = '<option selected value="'.htmlenc($_GET['q']).'"></option>';
-	if (binnen_school()) {
-		$result2 = mdb2_query(<<<EOT
+	if ($_GET['bw'] != 'x') {
+		if (binnen_school()) {
+			$result2 = mdb2_query(<<<EOT
 SELECT entities.entity_name leerlingnummer, name, GROUP_CONCAT(stamklassen.entity_name), surname, firstname, prefix
 FROM grp2ppl
 JOIN entities ON entity_id = ppl_id
@@ -425,20 +426,80 @@ GROUP BY entities.entity_id
 ORDER BY surname, firstname, prefix
 EOT
 , STAMKLAS);
-		while ($row = $result2->fetchRow(MDB2_FETCHMODE_ORDERED)) {
-			$options .= '<option value="'.htmlenc($row[0]).'">'.htmlenc($row[1].' ('.$row[2].'/'.$row[0].')').'</option>'."\n";
-		}
-	} else {
-		$query2 = <<<EOT
+			while ($row = $result2->fetchRow(MDB2_FETCHMODE_ORDERED)) {
+				$options .= '<option value="'.htmlenc($row[0]).'">'.htmlenc($row[1].' ('.$row[2].'/'.$row[0].')').'</option>'."\n";
+			}
+		} else {
+			$query2 = <<<EOT
 SELECT entity_name
 FROM grp2ppl
 JOIN entities ON entity_id = ppl_id
 WHERE file_id_basis = {$basis['file_id']} AND grp2ppl.lesgroep_id IN ( $safe_id )
 ORDER BY CAST(entity_name AS UNSIGNED INTEGER)
 EOT;
-		$result2 = mdb2_query($query2);
-		while ($row = $result2->fetchRow()) {
-			$options .= '<option class="llnrs">'.htmlenc($row[0]).'</option>'."\n";
+			$result2 = mdb2_query($query2);
+			while ($row = $result2->fetchRow()) {
+				$options .= '<option class="llnrs">'.htmlenc($row[0]).'</option>'."\n";
+			}
+		}
+	} else {
+		if (binnen_school()) {
+			$result2 = mdb2_query(<<<EOT
+SELECT entity_name, name, surname, firstname, prefix, old, new
+FROM (
+	SELECT grp2ppl.ppl_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$wijz['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.lesgroep_id IN ( $safe_id )
+	AND grp2ppl.file_id_basis = {$basis['file_id']} 
+	UNION ALL
+	SELECT grp2ppl.ppl_id, 0 old, 1 new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$basis['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.lesgroep_id IN ( $safe_id )
+	AND grp2ppl.file_id_basis = {$wijz['file_id']} 
+	AND grp2ppl2.lesgroep_id IS NULL
+) AS bla
+JOIN entities ON entity_id = ppl_id
+JOIN names ON names.entity_id = entities.entity_id
+ORDER BY surname, firstname, prefix
+EOT
+);
+			while ($row = $result2->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+				if ($row['old']) {
+					if ($row['new']) $arrow = '';
+					else $arrow = ' &#8594;';
+				} else $arrow = ' &#8592;';
+				$options .= '<option value="'.htmlenc($row['entity_name']).'">'.htmlenc($row['name'].' ('.$row['entity_name'].')').$arrow.'</option>'."\n";
+			}
+		} else {
+			$query2 = <<<EOT
+SELECT entity_name, old, new
+FROM (
+	SELECT grp2ppl.ppl_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$wijz['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.lesgroep_id IN ( $safe_id )
+	AND grp2ppl.file_id_basis = {$basis['file_id']} 
+	UNION ALL
+	SELECT grp2ppl.ppl_id, 0 old, 1 new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$basis['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.lesgroep_id IN ( $safe_id )
+	AND grp2ppl.file_id_basis = {$wijz['file_id']} 
+	AND grp2ppl2.lesgroep_id IS NULL
+) AS bla
+JOIN entities ON entity_id = ppl_id
+ORDER BY CAST(entity_name AS UNSIGNED INTEGER)
+EOT;
+			$result2 = mdb2_query($query2);
+			while ($row = $result2->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+				if ($row['old']) {
+					if ($row['new']) $arrow = '';
+					else $arrow = ' &#8594;';
+				} else $arrow = ' &#8592;';
+				$options .= '<option value="'.htmlenc($row['entity_name']).'" class="llnrs">'.htmlenc($row['entity_name']).$arrow.'</option>'."\n";
+			}
 		}
 	}
 
@@ -514,7 +575,7 @@ EOT;
 			$subscript .= '<td>'.$row[1].'</td>';
 			if ($_GET['bw'] == 'x') {
 				$result3 = mdb2_query(<<<EOQ
-SELECT bla.lesgroep_id, bla.old, bla.new, entity_name 
+SELECT bla.old, bla.new, entity_name 
 FROM (
 	SELECT grp2ppl.lesgroep_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
 	FROM grp2ppl

@@ -486,6 +486,7 @@ case LEERLING:
 		if ($_GET['bw'] == 'x') {
 			$result3 = mdb2_query("SELECT entity_id FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$wijz['file_id']}");
 			while ($row = $result3->fetchRow()) $entity_ids_wijz[] = $row[0];
+			$safe_id_wijz = implode(',', $entity_ids_wijz);
 		}
 		
 		if (binnen_school()) {
@@ -511,10 +512,43 @@ EOT;
 		while (($row = $lln->fetchRow())) {
 			$subscript .= '<tr>';
 			$subscript .= '<td>'.$row[1].'</td>';
-			$grps = mdb2_query("SELECT entity_name FROM grp2ppl JOIN entities ON entities.entity_id = grp2ppl.lesgroep_id WHERE ppl_id = {$row[0]} AND file_id_basis = {$basis['file_id']} ORDER BY entity_type DESC, entity_name");
-			while (($row2 = $grps->fetchRow())) {
-				$subscript .= '<td>'.make_link($row2[0]).'</td>';
+			if ($_GET['bw'] == 'x') {
+				$result3 = mdb2_query(<<<EOQ
+SELECT bla.lesgroep_id, bla.old, bla.new, entity_name 
+FROM (
+	SELECT grp2ppl.lesgroep_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$wijz['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.ppl_id = {$row[0]}
+	AND grp2ppl.file_id_basis = {$basis['file_id']} 
+	UNION ALL
+	SELECT grp2ppl.lesgroep_id, 0 old, 1 new
+	FROM grp2ppl
+	LEFT JOIN grp2ppl AS grp2ppl2 ON grp2ppl2.lesgroep_id = grp2ppl.lesgroep_id AND grp2ppl2.file_id_basis = {$basis['file_id']} AND grp2ppl2.ppl_id = grp2ppl.ppl_id
+	WHERE grp2ppl.ppl_id = {$row[0]}
+	AND grp2ppl.file_id_basis = {$wijz['file_id']} 
+	AND grp2ppl2.lesgroep_id IS NULL
+) bla
+JOIN entities ON entities.entity_id = bla.lesgroep_id
+EOQ
+				);
+				//mdb2_res_table($result3);
+				$subscript .= '<td>';
+				while ($row2 = $result3->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+					$subscript .= ' ';
+					if ($row2['old']) {
+						if ($row2['new']) $subscript .= make_link($row2['entity_name']);
+						else $subscript .= '<del>'.make_link($row2['entity_name']).'</del>';
+					} else $subscript .= '<ins>'.make_link($row2['entity_name']).'</ins>';
+				}
+				$subscript .= '</td>';
+			} else {
+				$grps = mdb2_query("SELECT entity_name FROM grp2ppl JOIN entities ON entities.entity_id = grp2ppl.lesgroep_id WHERE ppl_id = {$row[0]} AND file_id_basis = {$basis['file_id']} ORDER BY entity_type DESC, entity_name");
+				while (($row2 = $grps->fetchRow())) {
+					$subscript .= '<td>'.make_link($row2[0]).'</td>';
+				}
 			}
+
 			$subscript .= '</tr>';
 		}
 		$subscript .= '</table>';

@@ -520,7 +520,7 @@ EOT;
 		$subscript .= '</table>';
 
 	} else {
-		if (binnen_school()) $type = mdb2_single_val("SELECT name FROM names WHERE entity_id IN ( $safe_id )");
+		if (binnen_school()) $type = mdb2_single_val("SELECT CONCAT(name, ' (', entity_name, ')') FROM names JOIN entities USING (entity_id) WHERE entity_id IN ( $safe_id )");
 		else $type = 'leerling '.htmlenc($entity_name);
 
 		// we maken voor deze leerling ook een lijst met lesgroepen

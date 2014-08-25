@@ -10,8 +10,11 @@ body {
 .berichtbody a:link {
 	text-decoration: underline;
 }	
-ins a {
-	text-decoration: underline !important;
+ins a:link {
+	text-decoration: underline;
+}
+ins a:visited {
+	text-decoration: underline;
 }
 a:link {
 	text-decoration: none; color: blue;

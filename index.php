@@ -212,8 +212,11 @@ if ($safe_week != $_GET['wk']) fatal_error('sanity check failed');
 $link_tail_wowk = '&amp;bw='.$_GET['bw'].'&amp;wk=';
 $link_tail_tail = (isset($_GET['debug'])?'&amp;debug':'');
 
-if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week.$link_tail_tail.'">';
-else $link_tail = $link_tail_wowk.$link_tail_tail.'">';
+if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week;
+else $link_tail = $link_tail_wowk;
+
+$link_tail_nodebug = $link_tail.'">';
+$link_tail .= $link_tail_tail.'">';
 
 if (!isset($_GET['q'])) $_GET['q'] = '';
 else $_GET['q'] = trim($_GET['q']);
@@ -901,7 +904,10 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 		   // al aan de beurt geweest zijn, zodat 'verplaatsing + uitval'
 		   // alleen 'verplaatsing' wordt
 
-if (isset($_GET['debug'])) mdb2_res_table($result);
+if (isset($_GET['debug'])) {
+	echo('<p><a href="?q='.urlencode($_GET['q']).$link_tail_nodebug.'[hide debug info]</a>');
+	mdb2_res_table($result);
+}
 $row = $result->fetchRow();
 
 if ($safe_week < 30) {

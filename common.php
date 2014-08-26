@@ -3,7 +3,7 @@
 
 require_once('mdb2_utils.php');
 
-// select configfile on the basis of the value of $_SERVER['ROOSTERPHP_CONFIG_KEY']
+// select configfile on the basis of the value of $_SERVER['EZ_ROOSTERBORD_CONFIG_KEY']
 // if not set, use config.php, otherwise use config_VALUE.php
 // you can use this, to host multiple instances from the same sourcedirectory
 

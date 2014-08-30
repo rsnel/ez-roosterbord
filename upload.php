@@ -46,7 +46,7 @@ EOQ
 <title>Upload en berichtenpagina voor de roostermakers</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
-<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script type="text/javascript" src="js/jquery.iframe-post-form.js"></script>
 <script type="text/javascript">

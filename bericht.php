@@ -55,7 +55,7 @@ body {
         font-size: 13px;
 }
 --></style>
-<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script type="text/javascript">
 //<![CDATA[

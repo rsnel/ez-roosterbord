@@ -1,7 +1,7 @@
 <? require_once('common.php');
 
 function html_start($collapsed = false) {
-	global $entity_type, $entity_multiple, $entity_name, $weken, $safe_week, $link_tail_wowk, $link_tail_tail, $prev_week, $next_week, $no_berichten, $default_week;
+	global $entity_type, $entity_multiple, $entity_name, $weken, $safe_week, $link_tail_wowk, $link_tail_tail, $prev_week, $next_week, $no_berichten, $default_week, $day_not_given, $default_day;
 	header("Content-Type: text/html; charset=UTF-8"); ?>
 <!DOCTYPE HTML>
 <html>
@@ -35,10 +35,21 @@ $(function(){
 <? } ?>
 		heightStyle: "content"
 	});
+	$('#select').submit(function () {
+		var wk = $('[name=wk]', this).val();
+		var dy = $('#fakeday', this).val();
+
+		// if submitted week is 'default' and submitted day matches 'default'
+		// set submitted day to empty string
+		if (dy == <? echo($default_day); ?> && wk == '') $('[name=dy]').val('');
+		else $('[name=dy]').val(dy);
+	});
+	// bind 'change' event of selectboxes of form#select to function that calls submit
+	$('#select>select').change(function () { $('#select').submit(); });
 });
 //]]>
 </script>
-</head>
+</head
 <body>
 <? if (config('ENABLE_TEST_WARNING')) { ?>
 <h1>DIT IS EEN TEST! Er vindt momenteel techisch onderhoud plaats
@@ -55,6 +66,7 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 } ?>
 <input name="bw" type="hidden" value="<? echo($_GET['bw']) ?>">
 <input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">
+<input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
 <? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 <? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP)) { ?>
  <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">&gt;Klassenboek&lt;</a>
@@ -63,10 +75,19 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 <? } else { ?>
  <a href="https://klassenboek.ovc.nl/">&gt;Klassenboek&lt;</a>
 <? } ?>
-</form></div>
-<div class="noprint" style="float: right"><form method="GET" name="basisweek" accept-charset="UTF-8">
-weeknummer:
-<? echo(($prev_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$prev_week.$link_tail_tail.'">&lt;</a>':'<del>&lt;</del>'); ?><select onchange="document.basisweek.submit()" name="wk">
+</form>
+</div>
+<div class="noprint" style="float: right">
+<form id="select" method="GET" name="basisweek" accept-charset="UTF-8">
+week/dag:
+<?
+if ($_GET['dy'] == '*')
+echo(($prev_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$prev_week.$link_tail_tail.'">&lt;</a>':'<del>&lt;</del>');
+else if ($_GET['dy'] == 1)
+echo(($prev_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$prev_week.'&amp;dy=5'.$link_tail_tail.'">&lt;</a>':'<del>&lt;</del>');
+else
+echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$safe_week.'&amp;dy='.($_GET['dy'] - 1).$link_tail_tail.'">&lt;</a>':'<del>&gt;</del>');
+?><select name="wk">
 <? foreach ($weken as $week) {
 	echo('<option');
 	if ($safe_week == $week) echo(' selected');
@@ -74,10 +95,24 @@ weeknummer:
 	if ($default_week != $week) echo($week);
 	echo('">'.$week.'</option>');
 } ?>
-</select><? echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>'); ?>
+</select><select id="fakeday">
+<option value="*">*</option>
+<option <? if ($_GET['dy'] == 1) echo('selected '); ?>value="1">ma</option>
+<option <? if ($_GET['dy'] == 2) echo('selected '); ?>value="2">di</option>
+<option <? if ($_GET['dy'] == 3) echo('selected '); ?>value="3">wo</option>
+<option <? if ($_GET['dy'] == 4) echo('selected '); ?>value="4">do</option>
+<option <? if ($_GET['dy'] == 5) echo('selected '); ?>value="5">vr</option>
+</select><input type="hidden" name="dy" value="<? echo($_GET['dy']); ?>"><? 
+if ($_GET['dy'] == '*')
+echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>');
+else if ($_GET['dy'] == 5)
+echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.'&amp;dy=1'.$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>');
+else
+echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$safe_week.'&amp;dy='.($_GET['dy'] + 1).$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>');
+?>
 <!-- <input onclick="document.basisweek.submit()" type="radio" <? if ($_GET['bw'] == 'b') echo('checked ') ?>name="bw" value="b">basisrooster
 <input onclick="document.basisweek.submit()" type="radio" <? if ($_GET['bw'] == 'w') echo('checked ') ?>name="bw" value="w">weekrooster -->
-<select onchange="document.basisweek.submit()" name="bw">
+<select name="bw">
 <option <? if ($_GET['bw'] == 'b') echo('selected ') ?>value="b">basisrooster</option>
 <option <? if ($_GET['bw'] == 'w') echo('selected ') ?>value="w">weekrooster</option>
 <option <? if ($_GET['bw'] == 'y') echo('selected ') ?>value="y">weekrooster; alleen wijzigingen</option>
@@ -86,7 +121,8 @@ weeknummer:
 </select>
 <input name="q" type="hidden" value="<? echo(htmlenc($_GET['q'])) ?>">
 <? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
-</form></div>
+</form>
+</div>
 <? }
 
 function html_end() {
@@ -137,6 +173,17 @@ if (!isset($_GET['bw'])) $_GET['bw'] = 'w';
 else if ($_GET['bw'] != 'w' && $_GET['bw'] != 'y' && $_GET['bw'] != 'b' && $_GET['bw'] != 'd' && $_GET['bw'] != 'x') $_GET['bw'] = 'w';
 
 $default_week = get_default_week($weken); // calculate default week
+$default_day = get_default_day($default_week);
+
+$day_not_given = 0;
+
+if (!isset($_GET['dy']) || $_GET['dy'] == '*') $_GET['dy'] = '*';
+else if ($_GET['dy'] == 1 || $_GET['dy'] == 2 || $_GET['dy'] == 3 || $_GET['dy'] == 4 || $_GET['dy'] == 5) {
+	$_GET['dy'] = (int)$_GET['dy'];
+} else {
+	$_GET['dy'] = $default_day;
+	$day_not_given = 1;
+}
 
 $week_not_given = 0;
 if (!isset($_GET['wk']) || !in_array($_GET['wk'], $weken)) {
@@ -208,15 +255,20 @@ if ($next_week == $default_week) $next_week = '';
 
 if ($safe_week != $_GET['wk']) fatal_error('sanity check failed');
 
-// $_GET['bw'] is already sanitized at this point
+// $_GET['bw'] and $_GET['dy'] are already sanitized at this point
 $link_tail_wowk = '&amp;bw='.$_GET['bw'].'&amp;wk=';
 $link_tail_tail = (isset($_GET['debug'])?'&amp;debug':'');
 
 if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week;
 else $link_tail = $link_tail_wowk;
 
-$link_tail_nodebug = $link_tail.'">';
-$link_tail .= $link_tail_tail.'">';
+if ($safe_week == $default_week && $_GET['dy'] == $default_day) {
+	$link_tail_nodebug = '&amp;dy='.$link_tail.'">';
+	$link_tail .= '&amp;dy='.$link_tail_tail.'">';
+} else {
+	$link_tail_nodebug = '&amp;dy='.$_GET['dy'].$link_tail.'">';
+	$link_tail .= '&amp;dy='.$_GET['dy'].$link_tail_tail.'">';
+}
 
 if (!isset($_GET['q'])) $_GET['q'] = '';
 else $_GET['q'] = trim($_GET['q']);
@@ -713,6 +765,10 @@ $subquery = rquery($safe_id, $safe_id_wijz?$safe_id_wijz:$safe_id, $basis['file_
 //$res_test = mdb2_query($subquery);
 //mdb2_res_table($res_test);
 
+// $_GET['dy'] is sanitized at this point
+if ($_GET['dy'] == '*') $day = '';
+else $day = ' AND f.dag = '.$_GET['dy'];
+
 // sort order:
 // - f_uur, f_dag (sort order same as required for html <table>
 // - wijz (make sure that uitval, verplaatst naar, vrijstelling are displayed before extra, verplaatst van, lokaalreservering)
@@ -728,7 +784,7 @@ SELECT f_zid, f.lesgroepen AS f_lesgroepen, f.vakken AS f_vakken,
 FROM ( $subquery ) AS sub
 JOIN lessen AS f ON f.les_id = f_id
 LEFT JOIN lessen AS s ON s.les_id = s_id
-WHERE f.lesgroepen IS NOT NULL AND f.dag != 0 AND f.uur != 0
+WHERE f.lesgroepen IS NOT NULL AND f.dag != 0 AND f.uur != 0$day
 ORDER BY f_uur, f_dag, wijz$multiple_sort, f_vakken, f_zid, s_dag DESC
 EOQ
 );
@@ -878,6 +934,7 @@ if ($entity_type == STAMKLAS || $entity_type == LESGROEP || $entity_type == LEER
 <form method="GET" name="leerling" accept-charset="UTF-8">
 <input type="hidden" name="bw" value="<? echo($_GET['bw']) ?>">
 <input type="hidden" name="wk" value="<? echo($safe_week) ?>">
+<input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
 <? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 <? }
 
@@ -920,16 +977,18 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 ?>
 <p><table id="rooster">
 <tr><th></th>
-<th>ma <? echo date("j-n", $thismonday)         ?></th>
-<th>di <? echo date("j-n", $thismonday + 86400) ?></th>
-<th>wo <? echo date("j-n", $thismonday +172800) ?></th>
-<th>do <? echo date("j-n", $thismonday +259200) ?></th>
-<th>vr <? echo date("j-n", $thismonday +345600) ?></th>
+<? if ($_GET['dy'] == 1 || $_GET['dy'] == '*') { ?><th>ma <? echo date("j-n", $thismonday)         ?></th><? } ?>
+<? if ($_GET['dy'] == 2 || $_GET['dy'] == '*') { ?><th>di <? echo date("j-n", $thismonday + 86400) ?></th><? } ?>
+<? if ($_GET['dy'] == 3 || $_GET['dy'] == '*') { ?><th>wo <? echo date("j-n", $thismonday +172800) ?></th><? } ?>
+<? if ($_GET['dy'] == 4 || $_GET['dy'] == '*') { ?><th>do <? echo date("j-n", $thismonday +259200) ?></th><? } ?>
+<? if ($_GET['dy'] == 5 || $_GET['dy'] == '*') { ?><th>vr <? echo date("j-n", $thismonday +345600) ?></th><? } ?>
 </tr>
 <? for ($i = 1; $i <= 9; $i++) {
 	echo('<tr class="spacer"><td>'.$i.'</td>'."\n");
 	for ($j = 1; $j <= 5; $j++) {
-		echo('<td>');
+		if ($_GET['dy'] != '*' && $_GET['dy'] != $j) continue;
+		if ($_GET['dy'] == '*') echo('<td>');
+		else echo('<td class="single">');
 		while ($row && $row[DAG] == $j && $row[UUR] == $i) {
 			cleanup_row($row);
 			$extra = ''; $comment = '';

@@ -175,6 +175,22 @@ function get_default_week($weken) {
         return $week;
 }
 
+function get_default_day($default_week) {
+	$ret = 1;
+	if ($default_week < 30) {
+                $year = substr(config('SCHOOLJAAR_LONG'), 5);
+	} else {
+		$year = substr(config('SCHOOLJAAR_LONG'), 0, 4);
+	}
+	$day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $default_week - 1));
+	$thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60 + (50 + 16*60)*60;
+	while ($ret < 5 && $_SERVER['REQUEST_TIME'] > $thismonday) {
+		$ret++;
+		$thismonday += 24*60*60;
+	}
+	return $ret;
+}
+
 /* get rid of slashes produced by a moronic default setting on which
  * some software still relies... */
 function cleanup_magic_quotes(&$array) {

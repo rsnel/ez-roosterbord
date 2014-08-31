@@ -1,5 +1,250 @@
 <? require_once('common.php');
 
+function mobile_html() {
+	global $result, $safe_week, $default_week, $day_not_given;
+	global $link_tail_wowk, $prev_week, $next_week, $link_tail_tail;
+	global $entity_name, $entity_type, $entity_multiple, $basis, $wijz;
+	global $week_info;
+	global $berichten;
+$dubbel = array(); // in deze array houden we bij welke zermelo_ids
+		   // al aan de beurt geweest zijn, zodat 'verplaatsing + uitval'
+		   // alleen 'verplaatsing' wordt
+	header("Content-Type: text/html; charset=UTF-8"); ?>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
+<link rel="stylesheet" href="css/mobile.css">
+<link rel="stylesheet" href="css/jquery.mobile-1.4.3.min.css">
+<script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
+</head>
+<body>
+<div data-role="page" id="main">
+<div data-role="header" data-position="fixed">
+<a style="margin-left: 5px; margin-right: 5px" data-transition="slide" data-direction="reverse" class="ui-btn ui-btn-left ui-btn-inline ui-icon-carat-l ui-btn-icon-notext ui-corner-all<?
+	if($prev_week === NULL && $_GET['dy'] == 1) {
+		?> ui-state-disabled<?
+	} ?>" href="?q=<?
+		echo(urlencode($_GET['q']).$link_tail_wowk.(($_GET['dy'] == 1)?$prev_week:(($safe_week == $default_week)?'':$safe_week)).'&amp;m&amp;dy='.(($_GET['dy'] == 1)?5:$_GET['dy']-1).$link_tail_tail)
+?>"></a>
+<div class="ui-btn-right">
+<a style="margin-left: 5px; margin-right: 5px; float: left" data-transition="slidefade" class="ui-btn ui-btn-inline ui-icon-home ui-btn-icon-notext ui-corner-all" href="?q=&amp;m<? echo($link_tail_tail); ?>"></a>
+<a style="margin-left: 5px; margin-right: 5px; float: left" data-transition="slide" class="ui-btn ui-btn-inline ui-icon-carat-r ui-btn-icon-notext ui-corner-all<?
+	if($next_week === NULL && $_GET['dy'] == 5) {
+		?> ui-state-disabled<?
+	} ?>" href="?q=<?
+		echo(urlencode($_GET['q']).$link_tail_wowk.(($_GET['dy'] == 5)?$next_week:(($safe_week == $default_week)?'':$safe_week)).'&amp;m&amp;dy='.(($_GET['dy'] == 5)?1:$_GET['dy']+1).$link_tail_tail);
+
+if ($safe_week < 30) {
+	        $year = substr(config('SCHOOLJAAR_LONG'), 5);
+		} else {
+        $year = substr(config('SCHOOLJAAR_LONG'), 0, 4);
+}
+$day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
+$thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
+?>"></a>
+</div>
+<h1><?
+echo(config('SCHOOL_AFKORTING').' ');
+switch ($_GET['dy']) {
+	case 1: echo('ma');
+		break; 
+	case 2: echo('di');
+		break; 
+	case 3: echo('wo');
+		break; 
+	case 4: echo('do');
+		break; 
+	case 5: echo('vr');
+		break; 
+}
+echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
+?>
+</h1>
+</div>
+<div data-role="main" class="ui-content">
+<ul data-role="listview">
+<li>
+<form id="search" method="GET" data-transition="pop" accept-charset="UTF-8">
+<input type="search" name="q" placeholder="<? echo($entity_type === '' && $_GET['q'] != ''?'zoekterm '.htmlenc($_GET['q']).' niet gevonden':'klas, leerlingnr, docent, lokaal...'); ?>" value="<? echo(htmlenc($entity_name)) ?>">
+<input type="hidden" name="m">
+<input name="bw" type="hidden" value="<? echo($_GET['bw']) ?>">
+<input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">
+<input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
+</form>
+</li>
+<? if ($entity_type) { 
+
+	$bericht = NULL;
+	if ($berichten) $bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC);
+	if ($bericht) {
+	?><li><div data-role="collapsibleset"><?
+	do {
+		echo('<div data-role="collapsible"><h3>'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</h3>');
+		echo('<p>'.$bericht['bericht_body'].'</div>');
+	} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
+	?></div></li><? 
+	}
+?></ul>
+<p>
+<ul data-role="listview">
+<? 	 $row = $result->fetchRow();
+	for ($i = 1; $i < 10; $i++) {
+?><li><div class="ui-grid-a"><div style="width: 5%" class="ui-block-a"><? echo($i); ?></div>
+<div style="width: 95%" class="ui-block-b"><?
+		while ($row[UUR] == $i) {
+			echo('<div style="text-align: center">');
+
+			cleanup_row($row);
+			$extra = ''; $comment = '';
+			
+			if ($row[WIJZ_ID]) { // deze les is: extra/nieuw, lokaalreservering, (fake)verplaatstvan of gewijzigd
+				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
+					if ($row[VAKKEN] == 'lok') {
+						$row[VAKKEN] = '';
+						$extra = ' lokaalreservering';
+						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.htmlenc($row[NOTITIE]).')';
+						else $comment = '(lokaalreservering)';
+					} else if (preg_match('/^van /', $row[NOTITIE])) {
+						$extra = ' verplaatstvan';
+						$comment = '('.htmlenc($row[NOTITIE]).')';
+					} else {
+						$extra = ' extra';
+						if ($_GET['bw'] == 'x') {
+							$comment = ' (nieuw';
+							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">nieuw: </span>'.htmlenc($row[NOTITIE]);
+						} else {
+							$comment = ' (extra';
+							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">extra: </span>'.htmlenc($row[NOTITIE]);
+						}
+						$comment .= ')';
+					}
+				} else { // bij deze les hoort een oude les, dus gewijzigd of verplaatstvan
+					// staat de les op hetzelfde uur en is de oude les zichtbaar in dit rooster?
+					if ($row[UUR] == $row[UUR2] && $row[DAG] == $row[DAG2] && $row[VIS]) {
+						if ($row[LESGROEPEN] != $row[LESGROEPEN2] ||
+								$row[VAKKEN] != $row[VAKKEN2] ||
+								$row[DOCENTEN] != $row[DOCENTEN2] ||
+								$row[LOKALEN] != $row[LOKALEN2]) {
+							$extra = ' gewijzigd';
+							$comment = '(was '.print_diff($row);
+							if ($row[NOTITIE] != '') $comment .= ', '.htmlenc($row[NOTITIE]);
+							$comment .= ')';
+						}
+					} else {
+						$extra = ' verplaatstvan';
+						$comment = '(van '.print_diff($row);
+						if ($row[NOTITIE] != '') $comment .= ', '.htmlenc($row[NOTITIE]);
+						$comment .= ')';
+					}
+				}
+			} else if ($row[BASIS_ID2] || ($_GET['bw'] == 'x') && $wijz['file_id']) { // dit is uitval,vrijstelling,(fake)verplaatstnaar,gewijzigd 
+				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen nieuwe les, dus uitval/vrijstelling/fakeverplaatstnaar
+					// is deze les al aan de orde geweest bij een verplaatsing?
+					// zo ja, dan skippen we deze les
+					if (isset($dubbel[$row[BASIS_ID]])) {
+						$row = $result->fetchRow();
+						continue;
+					} else if ($_GET['bw'] == 'd') { // verberg vervallen lessen
+						$row = $result->fetchRow();
+						continue;
+					} else if (preg_match('/^naar /', $row[NOTITIE2])) {
+						$extra = ' verplaatstnaar';
+						$comment = '('.htmlenc($row[NOTITIE2]).')';
+					} else if (preg_match('/^vrij( (.*))?$/', $row[NOTITIE2], $matches)) {
+						$extra = ' vrijstelling';
+						if ($matches[2] != '') $comment = '(<span class="onlyprint">vrijstelling: </span>'.htmlenc($matches[2]).')';
+						else $comment = '(vrijstelling)';
+					} else {
+						$extra = ' uitval';
+						if ($_GET['bw'] == 'x') {
+							$comment = ' (oud';
+							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">oud: </span>'.htmlenc($row[NOTITIE2]);
+						} else {
+							$comment = ' (uitval';
+							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">uitval: </span>'.htmlenc($row[NOTITIE2]);
+						}
+						$comment .= ')';
+					}
+				} else { // bij deze les hoort een nieuwe les dus gewijzigd of verplaatstnaar
+					$dubbel[$row[BASIS_ID]] = 1;
+					// staat de nieuwe les op dezelfde plek en is deze zichtbaar in dit rooster?
+					if ($row[DAG] == $row[DAG2] && $row[UUR] == $row[UUR2] && $row[VIS]) {
+						$row = $result->fetchRow();
+						continue;
+					} else if ($_GET['bw'] == 'd') { // verberg verplaatste lessen
+						$row = $result->fetchRow();
+						continue;
+					} else {
+						$extra = ' verplaatstnaar';
+						$comment = '(naar '.print_diff($row);
+						if ($row[NOTITIE2] != '') $comment .= ', '.htmlenc($row[NOTITIE2]);
+						$comment .= ')';
+					}
+				}
+			} else if (!$week_info[$_GET['dy']] && $_GET['bw'] != 'b' && $_GET['bw'] != 'x') { // deze dag valt uit
+				$extra = ' vrijstelling';
+				$comment = '(vrijstelling)';
+			} else { // dit is een gewone les
+				if ($row[NOTITIE]) $comment = ' ('.$row[NOTITIE].')';
+			}
+
+			$info = array();
+			add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
+			add($info, $row[DOCENTEN], ($row[WIJZ_ID] && $row[DOCENTEN2])?'<span class="unknown">DOC?</span>':'');
+			add($info, $row[LOKALEN], ($row[WIJZ_ID] && $row[LOKALEN2])?'<span class="unknown">LOK?</span>':'');
+
+			echo('<div class="les'.$extra.'">');
+			if (count($info)) echo('<table><tr><td>'.implode('</td><td>/</td><td>', $info).'</td></tr></table>');
+			if ($comment) echo('<div class="comment">'.$comment.'</div>');
+			echo('<div class="clear"></div></div>');
+			echo('</div>');
+			$row = $result->fetchRow();
+		}
+	}
+	?></div></li><?
+} else {
+
+	$bericht = NULL;
+	if ($berichten) $bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC);
+	if ($bericht) {
+	$var = 0;
+	?><li><div data-role="collapsibleset"><?
+	do {
+		echo('<div '.(!$var?'data-collapsed="false" ':'').'data-role="collapsible"><h3>'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</h3>');
+		echo('<p>'.$bericht['bericht_body'].'</div>');
+		$var = 1;
+	} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
+	?></div></li><?
+	}
+
+}
+?>
+</ul>
+</div>
+<div data-role="footer" data-position="fixed">
+<div data-role="navbar">
+<ul>
+<li>
+<? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP)) { ?>
+ <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">Klassenboek</a>
+<? }  else if (!$entity_multiple && $entity_type == LEERLING) { ?>
+ <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">Klassenboek</a>
+<? } else { ?>
+ <a href="https://klassenboek.ovc.nl/">Klassenboek</a>
+<? } ?>
+</li>
+<li><? echo(make_link2($_GET['q'], 'Desktop versie')); ?></li>
+</ul>
+</div>
+</div>
+</body>
+</html>
+<? }
+
 function html_start($collapsed = false) {
 	global $entity_type, $entity_multiple, $entity_name, $weken, $safe_week, $link_tail_wowk, $link_tail_tail, $prev_week, $next_week, $no_berichten, $default_week, $day_not_given, $default_day;
 	header("Content-Type: text/html; charset=UTF-8"); ?>
@@ -36,13 +281,13 @@ $(function(){
 		heightStyle: "content"
 	});
 	$('#select').submit(function () {
-		var wk = $('[name=wk]', this).val();
+		/*var wk = $('[name=wk]', this).val();
 		var dy = $('#fakeday', this).val();
 
 		// if submitted week is 'default' and submitted day matches 'default'
 		// set submitted day to empty string
 		if (dy == <? echo($default_day); ?> && wk == '') $('[name=dy]').val('');
-		else $('[name=dy]').val(dy);
+		else $('[name=dy]').val(dy);*/
 	});
 	// bind 'change' event of selectboxes of form#select to function that calls submit
 	$('#select>select').change(function () { $('#select').submit(); });
@@ -79,7 +324,7 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 </div>
 <div class="noprint" style="float: right">
 <form id="select" method="GET" name="basisweek" accept-charset="UTF-8">
-week/dag:
+weeknummer:
 <?
 if ($_GET['dy'] == '*')
 echo(($prev_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$prev_week.$link_tail_tail.'">&lt;</a>':'<del>&lt;</del>');
@@ -95,14 +340,14 @@ echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.
 	if ($default_week != $week) echo($week);
 	echo('">'.$week.'</option>');
 } ?>
-</select><select id="fakeday">
+<!--</select><select id="fakeday">
 <option value="*">*</option>
 <option <? if ($_GET['dy'] == 1) echo('selected '); ?>value="1">ma</option>
 <option <? if ($_GET['dy'] == 2) echo('selected '); ?>value="2">di</option>
 <option <? if ($_GET['dy'] == 3) echo('selected '); ?>value="3">wo</option>
 <option <? if ($_GET['dy'] == 4) echo('selected '); ?>value="4">do</option>
 <option <? if ($_GET['dy'] == 5) echo('selected '); ?>value="5">vr</option>
-</select><input type="hidden" name="dy" value="<? echo($_GET['dy']); ?>"><? 
+</select>--><input type="hidden" name="dy" value="<? echo($_GET['dy']); ?>"><? 
 if ($_GET['dy'] == '*')
 echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>');
 else if ($_GET['dy'] == 5)
@@ -168,6 +413,9 @@ if ($min_week_id) {
 	$res->free();
 } else $weken = array();
 
+// force weekrooster in mobile mode
+if (isset($_GET['m'])) $_GET['bw'] = 'w';
+
 /* sanitize the input */
 if (!isset($_GET['bw'])) $_GET['bw'] = 'w';
 else if ($_GET['bw'] != 'w' && $_GET['bw'] != 'y' && $_GET['bw'] != 'b' && $_GET['bw'] != 'd' && $_GET['bw'] != 'x') $_GET['bw'] = 'w';
@@ -177,7 +425,12 @@ $default_day = get_default_day($default_week);
 
 $day_not_given = 0;
 
-if (!isset($_GET['dy']) || $_GET['dy'] == '*') $_GET['dy'] = '*';
+if (!isset($_GET['m'])) $_GET['dy'] = '*';
+
+if (!isset($_GET['dy']) || $_GET['dy'] == '*') {
+	if (!isset($_GET['m'])) $_GET['dy'] = '*';
+	else $_GET['dy'] = $default_day;
+}
 else if ($_GET['dy'] == 1 || $_GET['dy'] == 2 || $_GET['dy'] == 3 || $_GET['dy'] == 4 || $_GET['dy'] == 5) {
 	$_GET['dy'] = (int)$_GET['dy'];
 } else {
@@ -814,9 +1067,14 @@ EOQ
 //mdb2_res_table($result);
 cont:
 
+function make_link2($target, $text = NULL) {
+	global $link_tail;
+	return '<a rel="external" href="?'.'q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
+}
+
 function make_link($target, $text = NULL) {
 	global $link_tail;
-	return '<a href="?q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
+	return '<a data-transition="flip" href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
 }
 
 function make_link_conditional($target, $text) {
@@ -904,6 +1162,11 @@ function show_berichten($entity_type, $entity_multiple, $berichten) { ?>
 <?
 }
 
+if (isset($_GET['m'])) {
+	mobile_html();
+	exit;
+}
+
 html_start($entity_type !== ''); ?><div class="clear" style="padding-top: 1px;">
 <?
 if ($entity_type === '') { 
@@ -974,6 +1237,7 @@ if ($safe_week < 30) {
 }
 $day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
 $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
+
 ?>
 <p><table id="rooster">
 <tr><th></th>
@@ -990,6 +1254,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 		if ($_GET['dy'] == '*') echo('<td>');
 		else echo('<td class="single">');
 		while ($row && $row[DAG] == $j && $row[UUR] == $i) {
+
 			cleanup_row($row);
 			$extra = ''; $comment = '';
 			
@@ -1132,6 +1397,7 @@ Er is geen oud basisrooster<? } ?>
 <? if ($wijz['file_id']) { ?>, wijzigingen <? echo(print_rev($wijz['timestamp'], $wijz['wijz_id'])); } else { ?>, er zijn geen roosterwijzigingen ingelezen voor deze week<? } ?>.
 <? } ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
+Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m">mobiele versie</a> van het roosterbord!
 </span>
 
 <? html_end(); ?>

@@ -1,0 +1,123 @@
+img {
+	border-style: none;
+}
+.berichtbody a:link {
+	text-decoration: underline;
+}	
+ins a:link {
+	text-decoration: underline;
+}
+ins a:visited {
+	text-decoration: underline;
+}
+a:link {
+	text-decoration: none; color: blue;
+}
+a:visited {
+	text-decoration: none; color: blue;
+}
+a:hover {
+	text-decoration: underline;
+}
+.error {
+	color: red;
+}
+.legenda {
+	padding: 0px 0em 0px .9em; border: 1px solid black;
+}
+.small {
+	font-size: 12px;
+}
+.uitval {
+	background-color: #FF9696;
+	font-style: italic;
+}
+.vrijstelling {
+	background-color: #C0D4EE;
+	font-style: italic;
+}
+.lokaalreservering {
+	background-color: #FFAA88;
+}
+.verplaatstnaar {
+	background-color: #FAA1FA;
+	font-style: italic;
+}
+.verplaatstvan {
+	background-color: #FFBB66;
+}
+.extra {
+	background-color: #BBFFBB;
+}
+.gewijzigd {
+	background-color: #FFFF99;
+}
+table#rooster {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid black;
+}
+table#rooster th {
+	border: 1px solid black;
+}
+table#rooster > tbody > tr {
+	vertical-align: top;
+}
+table#rooster > tbody >tr > td {
+	width: 20%;
+	border: 1px solid black;
+}
+table#rooster > tbody >tr > td.single {
+	width: 100%;
+	border: 1px solid black;
+}
+#rooster td:first-child {
+	width: 0%;
+}
+.bericht {
+	border: 1px solid black;
+}
+div.les {
+	border-top: 1px solid #989898;
+	width: 100%;
+}
+div.les:first-child {
+	border: 0px;
+}
+.llnrs {
+	text-align: right;
+}
+.les table {
+	font-family: sans-serif;
+	border-spacing: 0px;
+	padding: 0px;
+	float: left;
+}
+.les tr {
+	vertical-align: middle;
+}
+.les td {
+	border: 0px;
+}
+#updateinfo {
+	font-size: 9px;
+}
+#leerlinglijst {
+	font-size: 13px;
+}
+#footer {
+	font-size: 9px;
+}
+.comment {
+	text-align: right;
+	float: right;
+}
+.clear {
+	clear: both;
+}
+.unknown {
+	color: red;
+}
+.onlyprint {
+	display: none;
+}

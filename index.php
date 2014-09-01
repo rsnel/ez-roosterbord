@@ -76,7 +76,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
 </form>
 </li>
-<? if ($entity_type) { 
+<? if ($entity_type !== '') { 
 
 	$bericht = NULL;
 	if ($berichten) $bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC);

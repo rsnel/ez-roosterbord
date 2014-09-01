@@ -516,9 +516,11 @@ if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week;
 else $link_tail = $link_tail_wowk;
 
 if ($safe_week == $default_week && $_GET['dy'] == $default_day) {
+	$link_tail_wody = $link_tail.'&amp;dy=';
 	$link_tail_nodebug = '&amp;dy='.$link_tail.'">';
 	$link_tail .= '&amp;dy='.$link_tail_tail.'">';
 } else {
+	$link_tail_wody = $link_tail.'&amp;dy=';
 	$link_tail_nodebug = '&amp;dy='.$_GET['dy'].$link_tail.'">';
 	$link_tail .= '&amp;dy='.$_GET['dy'].$link_tail_tail.'">';
 }
@@ -1072,9 +1074,10 @@ function make_link2($target, $text = NULL) {
 	return '<a rel="external" href="?'.'q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
 }
 
-function make_link($target, $text = NULL) {
-	global $link_tail;
-	return '<a data-transition="flip" href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
+function make_link($target, $text = NULL, $day = NULL) {
+	global $link_tail, $link_tail_wody;
+	if (!$day || $day == $_GET['dy']) return '<a data-transition="flip" href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
+	else return '<a data-transition="flow"'.(($day < $_GET['dy'])?' data-direction="reverse"':'').' href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail_wody.$day.'">'.($text?$text:htmlenc($target)).'</a>';
 }
 
 function make_link_conditional($target, $text) {
@@ -1088,16 +1091,16 @@ function split_links($target) {
 
 function print_diff($row) {
 	if ($row[DAG] != $row[DAG2] || $row[UUR] != $row[UUR2]) $output[] = print_dag($row[DAG2]).$row[UUR2];
-	if ($row[LESGROEPEN] != $row[LESGROEPEN2] && $row[LESGROEPEN2] != '') $output[] = make_link($row[LESGROEPEN2]);
+	if ($row[LESGROEPEN] != $row[LESGROEPEN2] && $row[LESGROEPEN2] != '') $output[] = make_link($row[LESGROEPEN2], NULL, $row[DAG2]);
 	if ($row[VAKKEN] != $row[VAKKEN2] && $row[VAKKEN2] != '') {
 		if ($row[VAKKEN2] != '' && !preg_match("/\.{$row[VAKKEN2]}[0-9]?\$/", $row[LESGROEPEN2])) $output[] = htmlenc($row[VAKKEN2]);
 	}
 	if ($row[DOCENTEN] != $row[DOCENTEN2]) {
-		if ($row[DOCENTEN2] != '') $output[] = make_link($row[DOCENTEN2]);
+		if ($row[DOCENTEN2] != '') $output[] = make_link($row[DOCENTEN2], NULL, $row[DAG2]);
 		else $output[] = '<span class="unknown">DOC?</span>';
 	}	
 	if ($row[LOKALEN] != $row[LOKALEN2]) {
-       		if ($row[LOKALEN2] != '') $output[] = make_link($row[LOKALEN2]);
+       		if ($row[LOKALEN2] != '') $output[] = make_link($row[LOKALEN2], NULL, $row[DAG2]);
 		else $output[] = '<span class="unknown">LOK?</span>';
 	}
 	return implode('/', $output);

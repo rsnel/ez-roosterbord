@@ -101,10 +101,9 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <? 	 $row = $result->fetchRow();
 	for ($i = 1; $i < 10; $i++) {
 ?><li><div class="ui-grid-a"><div style="width: 5%" class="ui-block-a"><? echo($i); ?></div>
-<div style="width: 95%" class="ui-block-b"><?
+<div style="width: 95%" class="ui-block-b">
+<?
 		while ($row[UUR] == $i) {
-			echo('<div style="text-align: center">');
-
 			cleanup_row($row);
 			$extra = ''; $comment = '';
 			
@@ -204,15 +203,17 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 			add($info, $row[DOCENTEN], ($row[WIJZ_ID] && $row[DOCENTEN2])?'<span class="unknown">DOC?</span>':'');
 			add($info, $row[LOKALEN], ($row[WIJZ_ID] && $row[LOKALEN2])?'<span class="unknown">LOK?</span>':'');
 
+			echo('<div style="text-align: center">'."\n");
 			echo('<div class="les'.$extra.'">');
 			if (count($info)) echo('<table><tr><td>'.implode('</td><td>/</td><td>', $info).'</td></tr></table>');
 			if ($comment) echo('<div class="comment">'.$comment.'</div>');
 			echo('<div class="clear"></div></div>');
-			echo('</div>');
 			$row = $result->fetchRow();
+			echo('</div>');
 		}
+			echo('</div>');
+		?></div></li><?
 	}
-	?></div></li><?
 } else {
 
 	$bericht = NULL;
@@ -246,6 +247,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 </li>
 <li><? echo(make_link2($_GET['q'], 'Desktop versie')); ?></li>
 </ul>
+</div>
 </div>
 </div>
 </body>

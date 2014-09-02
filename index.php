@@ -1133,7 +1133,14 @@ function add_lv(&$info, $lesgroepen, $vak) {
 	} else {
 		add($info, $lesgroepen);
 		// we laten het vak alleen zien als het niet in de naam van de lesgroep zit
-		if ($vak != '' && !preg_match("/{$vak}[0-9]?\$/", $lesgroepen)) $info[] = enccommabr($vak);
+		if ($vak != '') {
+			foreach (explode(',', $vak) as $v) {
+				if (!preg_match("/\.{$v}[0-9]/", $lesgroepen)) {
+					$info[] = enccommabr($vak);
+					break;
+				}
+			}
+		}
 	}
 }
 

@@ -1107,7 +1107,6 @@ function print_diff($row) {
 }
 
 function cleanup_row(&$row) {
-	// als er een stamklas met onzinnig voorvoegsel is, dan schrappen we dat voorvoegsel
 	if (config('HIDE_ROOMS')) {
 		$row[LOKALEN] = '';
 		if ($_GET['bw'] != 'b') $row[LOKALEN2] = '';

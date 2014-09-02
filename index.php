@@ -20,6 +20,13 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 <link rel="stylesheet" href="css/jquery.mobile-1.4.3.min.css">
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
+<? if (!isset($_GET['q']) || $_GET['q'] == '') { ?>
+<script type="text/javascript">
+$(document).on('pageshow', function () {
+	$('#searchbar').val('');
+});
+</script>
+<? } ?>
 </head>
 <body>
 <div data-role="page" id="main">
@@ -69,7 +76,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <ul data-role="listview">
 <li>
 <form id="search" method="GET" data-transition="pop" accept-charset="UTF-8">
-<input type="search" name="q" placeholder="<? echo($entity_type === '' && $_GET['q'] != ''?'zoekterm '.htmlenc($_GET['q']).' niet gevonden':'klas, leerlingnr, docent, lokaal...'); ?>" value="<? echo(htmlenc($entity_name)) ?>">
+<input id="searchbar" type="search" name="q" placeholder="<? echo($entity_type === '' && $_GET['q'] != ''?'zoekterm '.htmlenc($_GET['q']).' niet gevonden':'klas, leerlingnr, docent, lokaal...'); ?>" value="<? echo(htmlenc($entity_name)) ?>">
 <input type="hidden" name="m">
 <input name="bw" type="hidden" value="<? echo($_GET['bw']) ?>">
 <input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">

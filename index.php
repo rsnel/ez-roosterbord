@@ -14,6 +14,7 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 <html>
 <head>
 <meta charset="UTF-8">
+<link rel="shortcut icon" href="zermelo_zoom.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/mobile.css">

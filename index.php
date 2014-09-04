@@ -1099,7 +1099,10 @@ function split_links($target) {
 }
 
 function print_diff($row) {
-	if ($row[DAG] != $row[DAG2] || $row[UUR] != $row[UUR2]) $output[] = print_dag($row[DAG2]).$row[UUR2];
+	if ($row[DAG] != $row[DAG2] || $row[UUR] != $row[UUR2]) {
+		if ($row[DAG] != $row[DAG2] && $_GET['dy'] != '*') $output[] = make_link($_GET['q'], print_dag($row[DAG2]), $row[DAG2]).$row[UUR2];
+		else $output[] = print_dag($row[DAG2]).$row[UUR2];
+	}
 	if ($row[LESGROEPEN] != $row[LESGROEPEN2] && $row[LESGROEPEN2] != '') $output[] = make_link($row[LESGROEPEN2], NULL, $row[DAG2]);
 	if ($row[VAKKEN] != $row[VAKKEN2] && $row[VAKKEN2] != '') {
 		if ($row[VAKKEN2] != '' && !preg_match("/\.{$row[VAKKEN2]}[0-9]?\$/", $row[LESGROEPEN2])) $output[] = htmlenc($row[VAKKEN2]);

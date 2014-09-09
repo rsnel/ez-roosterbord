@@ -876,7 +876,7 @@ EOQ
 case LEERLING:
 	if ($entity_multiple) {
 		$multiple_sort = ', f_lesgroepen';
-		$type .= 'onderstaande leerlingen';
+		$type = 'onderstaande leerlingen';
 		$result2 = mdb2_query("SELECT entity_id FROM grp2ppl JOIN entities ON entity_id = lesgroep_id WHERE ppl_id IN ( $safe_id ) AND file_id_basis = {$basis['file_id']}");
 		while ($row = $result2->fetchRow()) $entity_ids[] = $row[0];
 

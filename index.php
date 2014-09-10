@@ -19,6 +19,7 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
 <link rel="shortcut icon" href="zermelo_zoom.ico">
+<meta name="msapplication-config" content="none">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/mobile.css">
@@ -271,6 +272,7 @@ function html_start($collapsed = false) {
 <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
 <link rel="shortcut icon" href="zermelo_zoom.ico">
+<meta name="msapplication-config" content="none">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/print.css" media="print">
@@ -486,6 +488,7 @@ EOQ
 <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
 <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
 <link rel="shortcut icon" href="zermelo_zoom.ico">
+<meta name="msapplication-config" content="none">
 <title>Roosterbord OVC <? echo(config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/print.css" media="print">

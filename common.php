@@ -48,10 +48,11 @@ define('CATEGORIE',7);
 
 $config_info = array(
 	'ENABLE_TEST_WARNING' => '0',
-	'HIDE_STUDENTS' =>  '0',
-	'HIDE_ROOMS' =>  '0',
-	'SCHOOLJAAR_LONG' =>  '2014/2015',
-	'SHOWHIDE_STUDENTNAMES' =>  '0'
+	'HIDE_STUDENTS' => '0',
+	'HIDE_ROOMS' => '0',
+	'SCHOOLJAAR_LONG' => '2014/2015',
+	'SHOWHIDE_STUDENTNAMES' => '0',
+	'DISABLE_WIJZIGINGEN' => '0'
 );
 
 // get config from database and set all unconfigured items to default values

@@ -129,7 +129,8 @@ Er staat al een basisrooster in de gegeven week en ik wil het overschrijven <inp
 <input type="hidden" class="randid" name="randid">
 <input id="submitbutton" type="submit" value="Upload">
 </form>
-
+ 
+<? if (!config('DISABLE_WIJZIGINGEN')) { ?>
 <h3>Upload roosterwijzigingen (txt)</h3>
 <p><form class="progress_udmz" enctype="multipart/form-data" action="do_upload.php" method="POST" accept-charset="UTF-8">
 De filenaam moet van de vorm <code>roosterwijzigingen_wk36.txt</code>
@@ -140,6 +141,7 @@ zijn, maximale grootte <? echo $upload_mb ?>MB.<br>
 <input type="hidden" class="randid" name="randid">
 <input id="submitbutton" type="submit" value="Upload">
 </form>
+<? } ?>
 
 <h3>Berichten</h3>
 <p><a href="bericht.php?secret=<? echo($_GET['secret']) ?>">nieuw bericht toevoegen</a>

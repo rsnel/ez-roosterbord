@@ -4,6 +4,9 @@ img {
 body {
 	font-size: 10px;
 }
+#lijstdiv {
+	font-size: 10px;
+}
 #content {
 	font-size: 13px;
 }
@@ -57,6 +60,42 @@ a:hover {
 }
 .gewijzigd {
 	background-color: #FFFF99;
+}
+table#klassenlijst {
+	width: 100%;
+	border-collapse: collapse;
+	border: 1px solid black;
+}
+table#klassenlijst th {
+	border: 1px solid black;
+}
+table#klassenlijst > tbody > tr {
+	vertical-align: top;
+}
+table#klassenlijst > tbody >tr > td.llnr {
+	width: 5%;
+	text-align: right;
+	border: 1px solid black;
+}
+table#klassenlijst > tbody >tr > td.naam {
+	width: 20%;
+	border: 1px solid black;
+}
+table#klassenlijst > tbody >tr > td.stamklas {
+	width: 5%;
+	border: 1px solid black;
+}
+table#klassenlijst > tbody >tr > td.bijz {
+	width: 60%;
+	border: 1px solid black;
+}
+table#klassenlijst > tbody >tr > td.present {
+	width: 5%;
+	border: 1px solid black;
+}
+table#klassenlijst > tbody >tr > td.tijd {
+	width: 5%;
+	border: 1px solid black;
 }
 table#rooster {
 	width: 100%;

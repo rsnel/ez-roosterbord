@@ -91,9 +91,6 @@ if ($min_week_id) {
 if (!isset($_GET['bw'])) $_GET['bw'] = 'w';
 else if ($_GET['bw'] != 'w' && $_GET['bw'] != 'y' && $_GET['bw'] != 'b' && $_GET['bw'] != 'd' && $_GET['bw'] != 'x') $_GET['bw'] = 'w';
 
-// als de roosterwijzigingen uit staan, zijn de enige geldige opties 'b' en 'x'
-if (config('DISABLE_WIJZIGINGEN') && $_GET['bw'] != 'x') $_GET['bw'] = 'b';
-
 $default_week = get_default_week($weken); // calculate default week
 $default_day = get_default_day($default_week);
 

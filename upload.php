@@ -171,7 +171,7 @@ else { ?>
 
 <h3>Configuratie</h3>
 <form action="do_config.php" method="POST">
-<br>Verberg lokalen <input <? if (config('HIDE_ROOMS')) { ?>checked <? } ?>type="checkbox" name="hide_rooms" value="1">
+Verberg lokalen <input <? if (config('HIDE_ROOMS')) { ?>checked <? } ?>type="checkbox" name="hide_rooms" value="1">
 <br>Verberg leerlingen <input <? if (config('HIDE_STUDENTS')) { ?>checked <? } ?>type="checkbox" name="hide_students" value="1">
 <br>Toon test waarschuwing <input <? if (config('ENABLE_TEST_WARNING')) { ?>checked <? } ?>type="checkbox" name="enable_test_warning" value="1">
 <input type="hidden" name="secret" value="<? echo(urlencode($_GET['secret'])) ?>">

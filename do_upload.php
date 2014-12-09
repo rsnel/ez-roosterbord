@@ -296,7 +296,7 @@ function import_basisrooster($file_id, $tmp_name) {
 	foreach ($udmz['Docent'] as $id => $row) {
 		incdone($done, $total, 2);
 		if (!checkset($row, 'Docent', array ('Voornaam', 'Tussenvoegsel',
-			'Achternaam', 'e-mail'))) return;
+			'Achternaam', 'e-mail'))) continue;
 
 		if (!($docent_id = add_entity($id, DOCENT))) return;
 		if ($row['Achternaam'] != '' && $row['Voornaam'] != '')

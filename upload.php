@@ -160,12 +160,14 @@ else { ?>
 </table>
 
 
+<? if (!config('DISABLE_WIJZIGINGEN')) { ?>
 <h3>Lesweken/lesdagen</h3> 
 <form action="do_lesdagen.php" method="POST">
 <? mdb2_res_table($res); ?>
 <input type="submit" value="Lesdagen opslaan">
 <input type="hidden" name="secret" value="<? echo(urlencode($_GET['secret'])) ?>">
 </form>
+<? } ?>
 
 <h3>Configuratie</h3>
 <form action="do_config.php" method="POST">

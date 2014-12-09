@@ -119,7 +119,7 @@ $upload_mb = min($max_upload, $max_post, $memory_limit);
 
 <h3>Upload basisrooster (udmz)</h3>
 <p><form class="progress_udmz" enctype="multipart/form-data" action="do_upload.php" method="POST" accept-charset="UTF-8">
-De filenaam moet van de vorm <code>Schooljaar 2013-2014_212.udmz</code>
+De filenaam moet van de vorm <code>*_212.udmz</code>
 zijn, maximale grootte <? echo $upload_mb ?>MB.<br>
 <input type="file" size="80" name="uploadedfile"><br>
 <input type="hidden" name="type" value="basis">

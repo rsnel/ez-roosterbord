@@ -536,10 +536,8 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 	} else fatal_error('deze wijzigigen hebben we al op deze week bij het meest recente basisrooster dat geldt voor deze week');
 		
 
-} else if ($_POST['type'] == 'basis' && preg_match('/^Schooljaar (\d{4})-(\d{4})_(\d+).udmz$/', $filename, $matches)) {
-	$year_start = $matches[1];
-	$year_end = $matches[2];
-	$version = $matches[3];
+} else if ($_POST['type'] == 'basis' && preg_match('/_(\d+).udmz$/', $filename, $matches)) {
+	$version = $matches[1];
 	//logit('ontv basis '.$year_start.'/'.$year_end.' versie '.$version);
 	if (mdb2_single_val("SELECT rooster_id FROM roosters WHERE week_id = %i", $_POST['week_id']) && isset($_POST['overwrite']) && $_POST['overwrite'] != 'true')
 		fatal_error("er staat al een basisrooster in deze week, vink de checkbox aan als je wilt overschrijven");

@@ -489,7 +489,7 @@ EOQ
 <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
 <link rel="shortcut icon" href="zermelo_zoom.ico">
 <meta name="msapplication-config" content="none">
-<title>Roosterbord OVC <? echo(config('SCHOOLJAAR_LONG')) ?></title>
+<title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/print.css" media="print">
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">

@@ -379,9 +379,11 @@ echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.
 <input onclick="document.basisweek.submit()" type="radio" <? if ($_GET['bw'] == 'w') echo('checked ') ?>name="bw" value="w">weekrooster -->
 <select name="bw">
 <option <? if ($_GET['bw'] == 'b') echo('selected ') ?>value="b">basisrooster</option>
+<? if (!config('DISABLE_WIJZIGINGEN')) { ?>
 <option <? if ($_GET['bw'] == 'w') echo('selected ') ?>value="w">weekrooster</option>
 <option <? if ($_GET['bw'] == 'y') echo('selected ') ?>value="y">weekrooster; alleen wijzigingen</option>
 <option <? if ($_GET['bw'] == 'd') echo('selected ') ?>value="d">weekrooster; lessen die doorgaan</option>
+<? } ?>
 <option <? if ($_GET['bw'] == 'x') echo('selected ') ?>value="x">basisrooster tov vorige week</option>
 </select>
 <input name="q" type="hidden" value="<? echo(htmlenc($_GET['q'])) ?>">
@@ -439,6 +441,9 @@ if (isset($_GET['m'])) $_GET['bw'] = 'w';
 /* sanitize the input */
 if (!isset($_GET['bw'])) $_GET['bw'] = 'w';
 else if ($_GET['bw'] != 'w' && $_GET['bw'] != 'y' && $_GET['bw'] != 'b' && $_GET['bw'] != 'd' && $_GET['bw'] != 'x') $_GET['bw'] = 'w';
+
+// als de roosterwijzigingen uit staan, zijn de enige geldige opties 'b' en 'x'
+if (config('DISABLE_WIJZIGINGEN') && $_GET['bw'] != 'x') $_GET['bw'] = 'b';
 
 $default_week = get_default_week($weken); // calculate default week
 $default_day = get_default_day($default_week);
@@ -1403,6 +1408,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 	echo('</tr>'."\n");
 } 
 ?></table>
+<? if (!config('DISABLE_WIJZIGINGEN') || $_GET['bw'] != 'b') { ?>
 <div class="noprint small">Kleurcodes:
 <? if ($_GET['bw'] == 'x') { ?>
 <span class="legenda uitval">&nbsp;</span>&nbsp;oud,
@@ -1419,7 +1425,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 <span class="legenda verplaatstnaar">&nbsp;</span>&nbsp;verplaatst naar,
 <span class="legenda vrijstelling">&nbsp;</span>&nbsp;vrijstelling,
 <span class="legenda lokaalreservering">&nbsp;</span>&nbsp;lokaalreservering.
-</div>
+</div><? } ?>
 </div><? } ?>
 <p>
 <? if ($_GET['bw'] == 'x') { ?>
@@ -1431,7 +1437,9 @@ Er is geen oud basisrooster<? } ?>
 <? if ($wijz['file_id']) { ?>, nieuw basisrooster <? echo(print_rev($wijz['timestamp'], $wijz['basis_id'])); } else { ?>, er is nog geen nieuw basisrooster voor deze week<? } ?>.
 <? } else { ?>
 <span id="updateinfo">Update basisrooster <? echo(print_rev($basis['timestamp'], $basis['basis_id'])); ?>
-<? if ($wijz['file_id']) { ?>, wijzigingen <? echo(print_rev($wijz['timestamp'], $wijz['wijz_id'])); } else { ?>, er zijn geen roosterwijzigingen ingelezen voor deze week<? } ?>.
+<? if (!config('DISABLE_WIJZIGINGEN')) { ?>
+<? if ($wijz['file_id']) { ?>, wijzigingen <? echo(print_rev($wijz['timestamp'], $wijz['wijz_id'])); } else { ?>, er zijn geen roosterwijzigingen ingelezen voor deze week<? } ?>
+<? } ?>.
 <? } ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
 Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m">mobiele versie</a> van het roosterbord!

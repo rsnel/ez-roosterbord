@@ -62,14 +62,14 @@ header('Content-Disposition: attachment; filename=export.csv;');
 $file = fopen('php://output', 'w');
 if (!$file) fatal_error('unable to open output');
 
-fputcsv($file, $legenda_rev);
+fputcsv($file, $legenda_rev, ';');
 
 foreach ($lln as &$data) {
 	for ($i = 1; $i < count($legenda); $i++) {
 		if (!isset($data[$i])) $data[$i] = ' ';
 	}
 	ksort($data);
-	fputcsv($file, $data);
+	fputcsv($file, $data, ';');
 }
 unset($data);
 

@@ -185,6 +185,10 @@ Verberg lokalen <input <? if (config('HIDE_ROOMS')) { ?>checked <? } ?>type="che
 
 Toegang tot de <a href="getlog.php?secret=<? echo($_GET['secret']) ?>">logfile</a>.
 
+<h3>Leerling/Docent matrix</h3>
+
+Download <a href="matrix.php?secret=<? echo($_GET['secret']) ?>">leerling/docent matrix</a> op basis van meest recente basisrooster.
+
 <div id="dialog_udmz" style="display: none" title="Roosterupload">
 <div class="progressbar"><div class="progress-label" style=" position: absolute;
 left: 50%;

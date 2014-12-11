@@ -52,7 +52,8 @@ $config_info = array(
 	'HIDE_ROOMS' => '0',
 	'SCHOOLJAAR_LONG' => '2014/2015',
 	'SHOWHIDE_STUDENTNAMES' => '0',
-	'DISABLE_WIJZIGINGEN' => '0'
+	'DISABLE_WIJZIGINGEN' => '0',
+	'KLASSENBOEK_URL' => 'false'
 );
 
 // get config from database and set all unconfigured items to default values

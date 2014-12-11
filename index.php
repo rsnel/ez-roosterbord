@@ -243,12 +243,12 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <div data-role="navbar">
 <ul>
 <li>
-<? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP)) { ?>
- <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">Klassenboek</a>
-<? }  else if (!$entity_multiple && $entity_type == LEERLING) { ?>
- <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">Klassenboek</a>
+<? if (($klassenboek_url = config('KLASSENBOEK_URL')) != 'false') { ?>
+<? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP || $entity_type == LEERLING)) { ?>
+ <a href="<? echo($klassenboek_url) ?>nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">Klassenboek</a>
 <? } else { ?>
- <a href="https://klassenboek.ovc.nl/">Klassenboek</a>
+<a href="<? echo($klassenboek_url) ?>">Klassenboek</a>
+<? } ?>
 <? } ?>
 </li>
 <li><? echo(make_link2($_GET['q'], 'Desktop versie')); ?></li>
@@ -333,12 +333,12 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 <input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">
 <input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
 <? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
-<? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP)) { ?>
- <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">&gt;Klassenboek&lt;</a>
-<? }  else if (!$entity_multiple && $entity_type == LEERLING) { ?>
- <a href="https://klassenboek.ovc.nl/nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">&gt;Klassenboek&lt;</a>
+<? if (($klassenboek_url = config('KLASSENBOEK_URL')) != 'false') { ?>
+<? if (!$entity_multiple && ($entity_type == STAMKLAS || $entity_type == LESGROEP || $entity_type == LEERLING)) { ?>
+ <a href="<? echo($klassenboek_url) ?>nologin.php?week=<? echo($safe_week) ?>&amp;q=<? echo($entity_name) ?>">&gt;Klassenboek&lt;</a>
 <? } else { ?>
- <a href="https://klassenboek.ovc.nl/">&gt;Klassenboek&lt;</a>
+<a href="<? echo($klassenboek_url) ?>">&gt;Klassenboek&lt;</a>
+<? } ?>
 <? } ?>
 </form>
 </div>

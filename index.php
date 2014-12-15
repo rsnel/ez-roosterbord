@@ -1105,9 +1105,9 @@ function make_link2($target, $text = NULL) {
 }
 
 function make_link($target, $text = NULL, $day = NULL) {
-	global $link_tail, $link_tail_wody;
+	global $link_tail, $link_tail_wody, $link_tail_tail;
 	if (!$day || $day == $_GET['dy']) return '<a data-transition="flip" href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail.($text?$text:htmlenc($target)).'</a>';
-	else return '<a data-transition="flow"'.(($day < $_GET['dy'])?' data-direction="reverse"':'').' href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail_wody.$day.'">'.($text?$text:htmlenc($target)).'</a>';
+	else return '<a data-transition="flow"'.(($day < $_GET['dy'])?' data-direction="reverse"':'').' href="?'.(isset($_GET['m'])?'m&amp;':'').'q='.urlencode($target).$link_tail_wody.$day.$link_tail_tail.'">'.($text?$text:htmlenc($target)).'</a>';
 }
 
 function make_link_conditional($target, $text) {

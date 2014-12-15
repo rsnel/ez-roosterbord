@@ -11,9 +11,9 @@ EOQ
 );
 
 $res = mdb2_query(<<<EOQ
-SELECT ll, GROUP_CONCAT(CONCAT(doc, '/', bla) SEPARATOR ';') info FROM (
-	SELECT ll, doc, GROUP_CONCAT(vakken) bla FROM (
-		SELECT DISTINCT ll.entity_name ll, doc.entity_name doc, lessen.vakken
+SELECT ll, name, stamklassen.entity_name klas, GROUP_CONCAT(CONCAT(doc, '/', bla) SEPARATOR ';') info FROM (
+	SELECT ppl_id, ll, doc, GROUP_CONCAT(vakken ORDER BY vakken) bla FROM (
+		SELECT DISTINCT ll.entity_id ppl_id, ll.entity_name ll, doc.entity_name doc, lessen.vakken
 		FROM grp2ppl
 		JOIN entities2lessen AS grp2les ON grp2les.entity_id = grp2ppl.lesgroep_id
 		JOIN files2lessen ON files2lessen.les_id = grp2les.les_id AND file_id = $file_id
@@ -23,20 +23,28 @@ SELECT ll, GROUP_CONCAT(CONCAT(doc, '/', bla) SEPARATOR ';') info FROM (
 		JOIN entities AS ll ON ll.entity_id = grp2ppl.ppl_id
 		WHERE file_id_basis = $file_id
 	) AS lijst
-	GROUP BY ll, doc
+	GROUP BY ppl_id, doc
 ) AS lijst
-GROUP BY ll
+JOIN names ON names.entity_id = ppl_id
+JOIN grp2ppl ON grp2ppl.ppl_id = lijst.ppl_id AND file_id_basis = $file_id
+JOIN entities AS stamklassen ON stamklassen.entity_id = grp2ppl.lesgroep_id AND stamklassen.entity_type = %i
+GROUP BY lijst.ppl_id
+ORDER BY klas, surname, firstname, prefix
 EOQ
-, DOCENT);
+, DOCENT, STAMKLAS);
 
 $legenda = array();
 $legenda_rev = array();
-$legenda_rev[0] = '';
-$legenda_count = 1;
+$legenda_rev[0] = 'llnr';
+$legenda_rev[1] = 'naam';
+$legenda_rev[2] = 'klas';
+$legenda_count = 3;
 $lln = array();
 while (($row = $res->fetchRow(MDB2_FETCHMODE_ASSOC))) {
 	$data = array();
 	$data[] = $row['ll'];
+	$data[] = $row['name'];
+	$data[] = $row['klas'];
 	foreach (explode(';', $row['info']) as $docvak_packed) {
 		$docvak = explode('/', $docvak_packed);
 		if (!isset($legenda[$docvak[0]])) {

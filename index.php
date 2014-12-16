@@ -97,7 +97,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 	?><li><div data-role="collapsibleset"><?
 	do {
 		echo('<div data-role="collapsible"><h3>'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</h3>');
-		echo('<p>'.$bericht['bericht_body'].'</div>');
+		echo('<p style="white-space: normal">'.$bericht['bericht_body'].'</div>');
 	} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
 	?></div></li><? 
 	}
@@ -229,7 +229,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 	?><li><div data-role="collapsibleset"><?
 	do {
 		echo('<div '.(!$var?'data-collapsed="false" ':'').'data-role="collapsible"><h3>'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</h3>');
-		echo('<p>'.$bericht['bericht_body'].'</div>');
+		echo('<p style="white-space: normal">'.$bericht['bericht_body'].'</div>');
 		$var = 1;
 	} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
 	?></div></li><?

@@ -25,11 +25,11 @@ SELECT CONCAT('<span style="display: inline-block"><input type="checkbox" name="
 	entity_name, '</input></span>')
 FROM entities
 LEFT JOIN entities2berichten ON entities2berichten.entity_id = entities.entity_id AND entities2berichten.bericht_id = %i
-WHERE entity_active = 1 AND entity_type = %i ORDER BY entity_name
+WHERE (entity_active = 1 OR entities2berichten.entity_id IS NOT NULL) AND entity_type = %i ORDER BY entity_name
 EOQ;
 
 $koppel_count_query = <<<EOQ
-SELECT COUNT(*) FROM entities2berichten JOIN entities ON entities.entity_id = entities2berichten.entity_id WHERE bericht_id = %i AND entity_type = %i AND entity_active = 1
+SELECT COUNT(*) FROM entities2berichten JOIN entities ON entities.entity_id = entities2berichten.entity_id WHERE bericht_id = %i AND entity_type = %i
 EOQ;
 
 $k_stamklassen = mdb2_col(0, $koppel_query, $bericht_id, STAMKLAS);

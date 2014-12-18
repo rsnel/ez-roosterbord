@@ -189,6 +189,11 @@ Toegang tot de <a href="getlog.php?secret=<? echo($_GET['secret']) ?>">logfile</
 
 Download <a href="matrix.php?secret=<? echo($_GET['secret']) ?>">leerling/docent matrix</a> op basis van meest recente basisrooster.
 
+<h3>Verberg docenten/lokalen/vakken/stamklassen/categorie&euml;en</h3>
+
+Op deze <a href="hide.php?secret=<? echo($_GET['secret']) ?>">pagina</a> kun je
+bepaalde docenten/lokalen/vakken/stamklassen/categorie&euml;en verbergen op de homepagina van het rooster.
+
 <div id="dialog_udmz" style="display: none" title="Roosterupload">
 <div class="progressbar"><div class="progress-label" style=" position: absolute;
 left: 50%;

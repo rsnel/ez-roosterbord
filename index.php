@@ -905,7 +905,7 @@ EOT
 );
 		} else {
 			$query2 = <<<EOT
-SELECT DISTINCT entity_id, entity_name AS tmp
+SELECT DISTINCT entity_id, CONCAT('<a href="?q=', entity_name, '$link_tail', entity_name, '</a>') AS tmp
 FROM entities 
 WHERE entity_id IN ( $safe_id )
 ORDER BY CAST(entity_name AS UNSIGNED INTEGER)

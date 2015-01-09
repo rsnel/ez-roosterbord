@@ -786,7 +786,8 @@ EOT;
 	} else {
 		if (binnen_school()) {
 			$result2 = mdb2_query(<<<EOT
-SELECT entity_name, name, surname, firstname, prefix, old, new
+SELECT entities.entity_name, name, surname, firstname, prefix, old, new,
+	IFNULL(stamnew.entity_name, '#uit') stamnew, IFNULL(stamold.entity_name, '#uit') stamold
 FROM (
 	SELECT grp2ppl.ppl_id, 1 old, CASE WHEN grp2ppl2.lesgroep_id IS NULL THEN 0 ELSE 1 END new
 	FROM grp2ppl
@@ -802,17 +803,29 @@ FROM (
 	AND grp2ppl2.lesgroep_id IS NULL
 ) AS bla
 JOIN entities ON entity_id = ppl_id
+LEFT JOIN (
+	SELECT ppl_id, entity_name
+	FROM grp2ppl
+	JOIN entities ON entities.entity_id = grp2ppl.lesgroep_id AND entity_type = %i
+	WHERE file_id_basis = {$basis['file_id']}
+) AS stamold ON stamold.ppl_id = entities.entity_id
+LEFT JOIN (
+	SELECT ppl_id, entity_name
+	FROM grp2ppl
+	JOIN entities ON entities.entity_id = grp2ppl.lesgroep_id AND entity_type = %i
+	WHERE file_id_basis = {$wijz['file_id']}
+) AS stamnew ON stamnew.ppl_id = entities.entity_id
 JOIN names ON names.entity_id = entities.entity_id
 ORDER BY surname, firstname, prefix
 EOT
-);
+, STAMKLAS, STAMKLAS);
 			while ($row = $result2->fetchRow(MDB2_FETCHMODE_ASSOC)) {
 				if ($row['old']) {
 					if ($row['new']) $arrow = '';
 					else $arrow = ' &#8594;';
 				} else $arrow = ' &#8592;';
 				$qs[] = $row['entity_name'];
-				$options .= '<option value="'.htmlenc($row['entity_name']).'">'.htmlenc($row['name'].' ('.$row['entity_name'].')').$arrow.'</option>'."\n";
+				$options .= '<option value="'.htmlenc($row['entity_name']).'">'.htmlenc($row['name'].' ('.$row['entity_name'].'/').(($row['stamold'] == $row['stamnew'])?htmlenc($row['stamold']):htmlenc($row['stamnew']).'&#8592;'.htmlenc($row['stamold'])).')'.$arrow.'</option>'."\n";
 			}
 		} else {
 			$query2 = <<<EOT

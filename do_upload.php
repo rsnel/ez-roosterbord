@@ -469,6 +469,8 @@ switch ($_FILES['uploadedfile']['error']) {
 		fatal_error('onmogelijke error');
 }
 
+if ($_FILES['uploadedfile']['size'] == 0) fatal_error('file with no content uploaded, impossible!');
+
 $filename = $_FILES['uploadedfile']['name'];
 
 function shutdown_function() {

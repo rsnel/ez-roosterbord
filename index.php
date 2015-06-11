@@ -474,7 +474,7 @@ if ($_GET['wk'] == NULL) {
 	$berichten = mdb2_query(<<<EOQ
 SELECT bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
 LEFT JOIN (
-	SELECT bericht_id, GROUP_CONCAT(entity_name) entities
+	SELECT bericht_id, GROUP_CONCAT(entity_name ORDER BY entity_name) entities
 	FROM entities2berichten
 	JOIN entities ON entities.entity_id = entities2berichten.entity_id
 	GROUP BY bericht_id
@@ -614,7 +614,7 @@ if (!($target = $result->fetchRow()) ||
 	$berichten = mdb2_query(<<<EOQ
 SELECT bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
 LEFT JOIN (
-	SELECT bericht_id, GROUP_CONCAT(entity_name) entities
+	SELECT bericht_id, GROUP_CONCAT(entity_name ORDER BY entity_name) entities
 	FROM entities2berichten
 	JOIN entities ON entities.entity_id = entities2berichten.entity_id
 	GROUP BY bericht_id
@@ -1091,7 +1091,7 @@ if (($entity_type == LESGROEP || $entity_type == STAMKLAS || $entity_type == CAT
 	$berichten = mdb2_query(<<<EOQ
 SELECT bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
 LEFT JOIN (
-	SELECT bericht_id, GROUP_CONCAT(entity_name) entities
+	SELECT bericht_id, GROUP_CONCAT(entity_name ORDER BY entity_name) entities
 	FROM entities2berichten
 	JOIN entities ON entities.entity_id = entities2berichten.entity_id
 	GROUP BY bericht_id

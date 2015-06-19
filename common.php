@@ -1,5 +1,6 @@
 <?
 /* Copyright (c) Rik Snel 2011, license GNU AGPLv3 */
+ini_set('memory_limit', '256M');
 
 require_once('mdb2_utils.php');
 

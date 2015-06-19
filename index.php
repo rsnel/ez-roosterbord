@@ -469,6 +469,7 @@ if (!isset($_GET['wk']) || !in_array($_GET['wk'], $weken)) {
 	$week_not_given = 1;
 }
 
+// laat berichten zien als er nog geen rooster is
 if ($_GET['wk'] == NULL) {
 	// berichten
 	$berichten = mdb2_query(<<<EOQ

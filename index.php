@@ -1133,6 +1133,16 @@ function split_links($target) {
 	return implode(', ', array_map('make_link', explode(',', $target)));
 }
 
+function vakmatch($vak, $match) {
+	switch(config('VAKMATCH')) {
+	case 'vakmatch_vnc':
+		return preg_match("/[0-9]{$vak}\$/", $match);
+	default:
+		return preg_match("/\.{$vak}[0-9]\$/", $match);
+	}
+
+}
+
 function print_diff($row) {
 	if ($row[DAG] != $row[DAG2] || $row[UUR] != $row[UUR2]) {
 		if ($row[DAG] != $row[DAG2] && $_GET['dy'] != '*') $output[] = make_link($_GET['q'], print_dag($row[DAG2]), $row[DAG2]).$row[UUR2];
@@ -1140,7 +1150,7 @@ function print_diff($row) {
 	}
 	if ($row[LESGROEPEN] != $row[LESGROEPEN2] && $row[LESGROEPEN2] != '') $output[] = make_link($row[LESGROEPEN2], NULL, $row[DAG2]);
 	if ($row[VAKKEN] != $row[VAKKEN2] && $row[VAKKEN2] != '') {
-		if ($row[VAKKEN2] != '' && !preg_match("/\.{$row[VAKKEN2]}[0-9]?\$/", $row[LESGROEPEN2])) $output[] = htmlenc($row[VAKKEN2]);
+		if ($row[VAKKEN2] != '' && !vakmatch($row[VAKKEN2], $row[LESGROEPEN2])) $output[] = htmlenc($row[VAKKEN2]);
 	}
 	if ($row[DOCENTEN] != $row[DOCENTEN2]) {
 		if ($row[DOCENTEN2] != '') $output[] = make_link($row[DOCENTEN2], NULL, $row[DAG2]);
@@ -1182,7 +1192,7 @@ function add_lv(&$info, $lesgroepen, $vak) {
 		// we laten het vak alleen zien als het niet in de naam van de lesgroep zit
 		if ($vak != '') {
 			foreach (explode(',', $vak) as $v) {
-				if (!preg_match("/\.{$v}[0-9]/", $lesgroepen)) {
+				if (!vakmatch($v, $lesgroepen)) {
 					$info[] = enccommabr($vak);
 					break;
 				}

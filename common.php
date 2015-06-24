@@ -55,7 +55,8 @@ $config_info = array(
 	'SHOWHIDE_STUDENTNAMES' => '0',
 	'DISABLE_WIJZIGINGEN' => '0',
 	'KLASSENBOEK_URL' => 'false',
-	'IGNORE_BEFORE_DOT' => '0'
+	'IGNORE_BEFORE_DOT' => '0',
+	'VAKMATCH' => 'vakmatch_default'
 );
 
 // get config from database and set all unconfigured items to default values

@@ -324,7 +324,7 @@ function import_basisrooster($file_id, $tmp_name) {
 
 			if (!checkset($row, "Groep.$category", array('SET'))) return;
 
-			if (!($lesgroep_id = add_entity($category.'.'.$id, LESGROEP))) return;
+			if (!($lesgroep_id = add_entity((config('IGNORE_BEFORE_DOT')?$id:$category.'.'.$id), LESGROEP))) return;
 
 			if ($row['SET'] == '') continue; // geen leerlingen in deze groep
 

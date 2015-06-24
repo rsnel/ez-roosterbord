@@ -54,7 +54,8 @@ $config_info = array(
 	'SCHOOLJAAR_LONG' => '2014/2015',
 	'SHOWHIDE_STUDENTNAMES' => '0',
 	'DISABLE_WIJZIGINGEN' => '0',
-	'KLASSENBOEK_URL' => 'false'
+	'KLASSENBOEK_URL' => 'false',
+	'IGNORE_BEFORE_DOT' => '0'
 );
 
 // get config from database and set all unconfigured items to default values

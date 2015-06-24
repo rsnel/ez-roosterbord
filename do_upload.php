@@ -115,6 +115,7 @@ function cleanup_lesgroepen($lesgroep) {
 	// 1A.1A2A wordt 1A2A als er een stamklas met naam 1A2A bekend is in categorie 1A
 	global $stamz;
 	if (preg_match('/(\w+)\.(\w+)/', $lesgroep, $matches)) {
+		if (config('IGNORE_BEFORE_DOT') == 1) return $matches[2];
 		if (isset($stamz[$matches[2]]) && $stamz[$matches[2]] == $matches[1]) return $matches[2];
 	}
 

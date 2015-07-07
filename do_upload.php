@@ -80,7 +80,7 @@ function get_uur($uur) {
 }
 
 function get_uur_udmz($uur) {
-	if (preg_match('/u([1-9])/', $uur, $matches)) return $matches[1];
+	if (preg_match('/u(\d+)/', $uur, $matches)) return $matches[1];
 	fatal_error('onbekend lesuur '.$uur);
 }
 

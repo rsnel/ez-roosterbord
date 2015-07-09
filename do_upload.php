@@ -64,6 +64,9 @@ function add_entities2lessen($entity_id, $les_id) {
 	mdb2_exec("INSERT INTO entities2lessen ( entity_id, les_id ) VALUES ( $entity_id, $les_id )");
 }
 
+// deze functie wordt alleen gebruikt om roosterwijzigingen in het oude
+// roosterwijzigingen_wk??.txt format te lezen, in het nieuwe format
+// wordt er gewerkt met lesuren in plaats van tijden (het enige voordeel...)
 function get_uur($uur) {
         switch ($uur) {
 	        case '08:30': return 1;
@@ -135,6 +138,7 @@ function addslash($string) {
 function find_les($separator, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $basis_id) {
 	$dag = ($dag0 == '')?0:get_dag($dag0);
 	$uur = ($uur0 == '')?0:get_uur_udmz($uur0);
+	if ($uur > config('MAX_LESUUR')) logit("lesuur in rooster ($uur) groter dan MAX_LESUUR");
 	$lesgroepen1 = implode(',', $lesgroepen = array_map('cleanup_lesgroepen', explode_and_sort($separator, $lesgroepen0)));
 	$vakken1 = implode(',', $vakken = explode_and_sort(' ', $vakken0));
 	$docenten1 = implode(',', $docenten = explode_and_sort(' ', $docenten0));
@@ -157,6 +161,7 @@ EOQ
 function insert_les_nieuw($zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
 	$dag = ($dag0 == '')?0:get_dag($dag0);
 	$uur = ($uur0 == '')?0:get_uur_udmz($uur0);
+	if ($uur > config('MAX_LESUUR')) logit("lesuur in rooster ($uur) groter dan MAX_LESUUR");
 	$lesgroepen1 = implode(',', $lesgroepen = array_map('cleanup_lesgroepen', explode_and_sort('/', $lesgroepen0)));
 	$vakken1 = implode(',', $vakken = explode_and_sort(' ', $vakken0));
 	$docenten1 = implode(',', $docenten = explode_and_sort(' ', $docenten0));
@@ -200,6 +205,7 @@ EOT
 function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
 	$dag = ($dag0 == '')?0:get_dag($dag0);
 	$uur = ($uur0 == '')?0:(($separator == '/')?get_uur($uur0):get_uur_udmz($uur0));
+	if ($uur > config('MAX_LESUUR')) logit("lesuur in rooster ($uur) groter dan MAX_LESUUR");
 	$lesgroepen1 = implode(',', $lesgroepen = array_map('cleanup_lesgroepen', explode_and_sort($separator, $lesgroepen0)));
 	$vakken1 = implode(',', $vakken = explode_and_sort($separator, $vakken0));
 	$docenten1 = implode(',', $docenten = explode_and_sort($separator, $docenten0));

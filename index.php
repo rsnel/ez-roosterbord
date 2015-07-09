@@ -105,7 +105,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <p>
 <ul data-role="listview">
 <? 	 $row = $result->fetchRow();
-	for ($i = 1; $i < 10; $i++) {
+	for ($i = 1; $i < config('MAX_LESUUR') + 1; $i++) {
 ?><li><div class="ui-grid-a"><div style="width: 5%" class="ui-block-a"><? echo($i); ?></div>
 <div style="width: 95%" class="ui-block-b">
 <?
@@ -1313,7 +1313,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 <? if ($_GET['dy'] == 4 || $_GET['dy'] == '*') { ?><th>do <? echo date("j-n", $thismonday +259200) ?></th><? } ?>
 <? if ($_GET['dy'] == 5 || $_GET['dy'] == '*') { ?><th>vr <? echo date("j-n", $thismonday +345600) ?></th><? } ?>
 </tr>
-<? for ($i = 1; $i <= 9; $i++) {
+<? for ($i = 1; $i <= config('MAX_LESUUR'); $i++) {
 	echo('<tr class="spacer"><td>'.$i.'</td>'."\n");
 	for ($j = 1; $j <= 5; $j++) {
 		if ($_GET['dy'] != '*' && $_GET['dy'] != $j) continue;

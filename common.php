@@ -56,7 +56,8 @@ $config_info = array(
 	'DISABLE_WIJZIGINGEN' => '0',
 	'KLASSENBOEK_URL' => 'false',
 	'IGNORE_BEFORE_DOT' => '0',
-	'VAKMATCH' => 'vakmatch_default'
+	'VAKMATCH' => 'vakmatch_default',
+	'MAX_LESUUR' => 9
 );
 
 // get config from database and set all unconfigured items to default values

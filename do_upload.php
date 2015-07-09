@@ -127,6 +127,76 @@ function addslash($string) {
 	return '/'.$string;
 }
 
+// Zermelog geeft in het nieuwe format van de roosterwijzigingen de zermelo_id
+// er niet meer bij, het systeem moet nu in het basisrooster gaan zoeken welke les er
+// eigenlijk wijzigt, merk op dat als een les aan meerdere lesgroepen wordt gegeven, deze
+// groepen worden gescheiden door een slash '/', maar als er meerdere doceten/lokalen/vakken
+// betrokken zijn, dan worden deze gescheiden door een spatie ' '
+function find_les($separator, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $basis_id) {
+	$dag = ($dag0 == '')?0:get_dag($dag0);
+	$uur = ($uur0 == '')?0:get_uur_udmz($uur0);
+	$lesgroepen1 = implode(',', $lesgroepen = array_map('cleanup_lesgroepen', explode_and_sort($separator, $lesgroepen0)));
+	$vakken1 = implode(',', $vakken = explode_and_sort(' ', $vakken0));
+	$docenten1 = implode(',', $docenten = explode_and_sort(' ', $docenten0));
+	$lokalen1 = implode(',', $lokalen = explode_and_sort(' ', $lokalen0));
+
+	//echo("zoek basis_id = $basis_id:  $dag $uur $vakken1 $lesgroepen1 $docenten1 $lokalen1\n");
+	return mdb2_single_val(<<<EOQ
+SELECT zermelo_id FROM lessen
+JOIN files2lessen ON files2lessen.les_id = lessen.les_id AND file_id = $basis_id
+WHERE dag = $dag AND uur = $uur AND vakken = '%q'
+AND lesgroepen = '%q' AND docenten = '%q' AND lokalen = '%q'
+EOQ
+	, $vakken1, $lesgroepen1, $docenten1, $lokalen1);
+	exit;
+}
+
+// deze functie is tijdelijk toegevoed, omdat zermelo (in haar oneindige
+// wijsheid) in de nieuwe roosterwijzigingen_wk??.txt bestanden voor GROEPEN de '/'
+// als separator gerbruikt, maar voor vakken, docenten een lokalen een spatie
+function insert_les_nieuw($zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
+	$dag = ($dag0 == '')?0:get_dag($dag0);
+	$uur = ($uur0 == '')?0:get_uur_udmz($uur0);
+	$lesgroepen1 = implode(',', $lesgroepen = array_map('cleanup_lesgroepen', explode_and_sort('/', $lesgroepen0)));
+	$vakken1 = implode(',', $vakken = explode_and_sort(' ', $vakken0));
+	$docenten1 = implode(',', $docenten = explode_and_sort(' ', $docenten0));
+	$lokalen1 = implode(',', $lokalen = explode_and_sort(' ', $lokalen0));
+	// als er een dollarteken in een notitie voorkomt,
+	// gooi het en alles erna (en whitespace ervoor) dan weg
+	if (($clean = strstr($notitie, '$', true)) !== false) $notitie = trim($clean);
+
+	// we hebben een lock, dus er is geen race condition
+
+	// hebben we deze les al?
+	$les_id = mdb2_single_val(<<<EOQ
+SELECT les_id FROM lessen
+WHERE dag = $dag AND uur = $uur AND vakken = '%q'
+AND lesgroepen = '%q' AND docenten = '%q' AND lokalen = '%q' AND notitie = '%q'
+EOQ
+, $vakken1, $lesgroepen1, $docenten1, $lokalen1, $notitie);
+
+	if (!$les_id) { // deze les is nieuw
+		mdb2_exec(<<<EOT
+INSERT INTO lessen ( dag, uur, vakken, lesgroepen, docenten, lokalen, notitie )
+VALUES ( $dag, $uur, '%q', '%q', '%q', '%q', '%q' )
+EOT
+, $vakken1, $lesgroepen1, $docenten1, $lokalen1, $notitie);
+		$les_id = mdb2_last_insert_id();
+		$entity_ids = array();
+
+		// FIXME schrap dl.+ van vakken
+		$vakken = array_map('addslash', $vakken);
+
+		if ($lesgroepen0) foreach ($lesgroepen as $naam) $entity_ids[] = add_entity($naam, LESGROEP);
+		if ($vakken0) foreach ($vakken as $naam) $entity_ids[] = add_entity($naam, VAK);
+		if ($docenten0) foreach ($docenten as $naam) $entity_ids[] = add_entity($naam, DOCENT);
+		if ($lokalen0) foreach ($lokalen as $naam) $entity_ids[] = add_entity($naam, LOKAAL);
+
+		foreach ($entity_ids as $entity_id) add_entities2lessen($entity_id, $les_id);
+	}
+	mdb2_exec("INSERT INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
+}
+
 function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
 	$dag = ($dag0 == '')?0:get_dag($dag0);
 	$uur = ($uur0 == '')?0:(($separator == '/')?get_uur($uur0):get_uur_udmz($uur0));
@@ -362,7 +432,7 @@ EOT
 	lock_renew_helper(3, $done/$total);
 }
 
-function import_wijzigingen($file_id, $week, $tmp_name) {
+function import_wijzigingen($file_id, $week, $tmp_name, $basis_id) {
 	global $wijz, $stamz;
 	unset($GLOBALS['wijz']);
 	$wijz = array();
@@ -393,12 +463,74 @@ function import_wijzigingen($file_id, $week, $tmp_name) {
 	foreach ($sections['PREAMBULE'] as $atoms) {
 		incdone($done, $total, 2);
 		$old = explode(',', $atoms[1]);
-		$new = explode(',', $atoms[2]);
 
 		$max = count($atoms) - 1;
 
+		if ($max > 1) $new = explode(',', $atoms[2]);
+		//echo("nieuwe wijziging, aantal entries: $max\n");
+		//print_r($old);
+		//print_r($new);
 		if ($max < 5) {
-			logit('te weinig records in roosterwijziging');
+			// nieuw format roosterwijzigingen?
+			if ($max < 1) logit('te weinig records in roosterwijziging');
+
+			if ($max == 3) {
+				$notitie = $atoms[3];
+				logit("notitie van roostermakers: ".$notitie);
+			} else $notitie = NULL;
+
+			if ($atoms[1] == '' && $atoms[2] == '') {
+				// dit is een wijziging van niks naar niks WTF?!?!?
+				continue;
+			}
+
+			if ($max < 2 || $atoms[2] == '') { // lesuitval
+				//logit("lesuitval {$atoms[1]}");
+				if (!preg_match('/^([a-z]{2}) (u\d+)$/', $old[2], $matches)) {
+					logit("ongeldig format voor 'dag uur'-veld in wijzigingen file: {$old[2]}");
+					continue;
+				}
+				$dag = $matches[1];
+				$uur = $matches[2];
+				$zermelo_id = find_les('/', $dag, $uur, $old[1], $old[0], $old[3], $old[4], $basis_id);
+				if (!$zermelo_id) {
+					logit("oorspronkelijke les {$atoms[1]} niet gevonden?!?! wijziging {$atom[0]} kan niet worden ingelezen");
+					continue;
+				}
+				//echo('zermelo_id = '.find_les('/', $dag, $uur, $old[1], $old[0], $old[3], $old[4], $basis_id)."\n");
+				insert_les('/', $zermelo_id, '', '', '', '', '', '',  $file_id, $notitie);
+			} else {
+				//logit("echte wijziging {$atoms[1]} {$atoms[2]}");
+
+				// we zetten de zermelo_id vast op 0, alsof er sprake is van een extra les
+				// mocht er een oude les zijn, dan passen we de zermelo_id aan
+				$zermelo_id = 0;
+
+				if ($atoms[1] != '') {
+					//er is een oude les
+					if (!preg_match('/^([a-z]{2}) (u\d+)$/', $old[2], $matches)) {
+						logit("ongeldig format voor 'dag uur'-veld in wijzigingen file: {$old[2]}");
+						continue;
+					}
+					$dag = $matches[1];
+					$uur = $matches[2];
+					$zermelo_id = find_les('/', $dag, $uur, $old[1], $old[0], $old[3], $old[4], $basis_id);
+					if (!$zermelo_id) {
+						logit("oorspronkelijke les {$atoms[1]} niet gevonden?!?! wijziging {$atom[0]} kan niet worden ingelezen");
+						continue;
+					}
+					//echo('zermelo_id = '.find_les('/', $dag, $uur, $old[1], $old[0], $old[3], $old[4], $basis_id)."\n");
+				}
+
+				if (!preg_match('/^([a-z]{2}) (u\d+)$/', $new[2], $matches)) {
+					logit("ongeldig format voor 'dag uur'-veld in wijzigingen file: {$old[2]}");
+					continue;
+				}
+				$dag = $matches[1];
+				$uur = $matches[2];
+
+				insert_les_nieuw($zermelo_id, $dag, $uur, $new[1], $new[0], $new[3], $new[4],  $file_id, $notitie);
+			}
 			continue;
 		}
 
@@ -445,6 +577,7 @@ function import_wijzigingen($file_id, $week, $tmp_name) {
 			insert_les('/', $zermelo_id, $new[7], $new[5], $new[4], $new[1], $new[2], $new[3], $file_id, $notitie);
 		}
 	}
+	//exit;
 
 	// als we hier zijn, dan is alles goed gegaan
 	mdb2_exec("UPDATE files SET file_status = 1 WHERE file_id = $file_id");
@@ -510,6 +643,7 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 	$week_id = mdb2_single_val("SELECT week_id FROM weken WHERE week = %i", $week);
 	if (!$week_id) fatal_error('wijzingingen geupload van een week die geen lesweek is?!?!');
 	$basis_id = mdb2_single_val("SELECT basis_id FROM roosters WHERE week_id = $week_id AND wijz_id = 0 ORDER BY rooster_id DESC LIMIT 1");
+	$basis_file_id =  mdb2_single_val("SELECT file_id FROM roosters WHERE week_id = $week_id AND wijz_id = 0 ORDER BY rooster_id DESC LIMIT 1");
 	if (!$basis_id) fatal_error('geen basisrooster beschikbaar in deze week, dus er kunnen geen wijzingen op');
 
 	$md5 = calc_md5($_FILES['uploadedfile']['tmp_name']);
@@ -522,8 +656,8 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 			$file_id = get_file_id($md5, 2, 0);
 		}
 		$new_filename = move_upload('wijz', $md5, $week);
-		import_wijzigingen($file_id, $week, $new_filename);
-		$status = mdb2_single_val("SELECT file_status FROM files WHERE file_id = $file_id");
+		import_wijzigingen($file_id, $week, $new_filename, $basis_file_id);
+		$status = mdb2_single_val("SELECT file_status FROM files WHERE file_id = $basis_file_id");
 		if (!$status) fatal_error('de import is fout gegaan, we kunnen deze wijzigingen niet publiceren :(, mail snelr@ovc.nl');
 
 		//logit('import succesvol, nu nog koppelen aan weken');

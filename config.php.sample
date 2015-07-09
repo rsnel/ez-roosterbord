@@ -3,13 +3,13 @@
 
 $config = array(
 	'UPLOAD_SECRET' => '', // set this to a long string of nonsense (like the output of pwgen -s 64)
-	'DSN' => 'mysql://rooster:sdkjfSDKFJ@unix+localhost/rooster1112?charset=utf8',
-	'DATADIR' => 'data/',
+	'DSN' => 'mysql://rooster:sdkjfSDKFJ@unix+localhost/rooster1516?charset=utf8',
+	'DATADIR' => '/var/cache/roosterphp/rlo/',
 	'LOGFILE' => 'log.txt',
 	'TIMEZONE' => 'Europe/Amsterdam',
 	'INTERNAL_IPS' => array('127.0.0.1/0' , '172.16.0.0/20'),
-	'SCHOOL_VOLUIT' => 'Oostvaarders College',
-	'SCHOOL_AFKORTING' => 'OVC',
+	'SCHOOL_VOLUIT' => 'Rijnlandslyceum Oegstgeest',
+	'SCHOOL_AFKORTING' => 'RLO',
 	'ZERMELO_CATEGORY_IGNORE' =>  array('OVERIG', '#uit', 'Algemeen'),
 	'ZERMELO_GROUP_IGNORE' => array('#allen'),
         'ZERMELO_ENCODING' =>  'ISO-8859-1'

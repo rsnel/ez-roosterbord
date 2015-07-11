@@ -110,7 +110,7 @@ function check_roostermaker($secret) {
 
 function cidr_match($ip, $range) {
 //	echo("cidr_match $ip $range");
-	list ($subnet, $bits) = explode('/', $range);
+	list ($subnet, $bits) = array_pad(explode('/', $range), 2, 0);
 
 	// no /, so $range is a single IP address
 	if (!$bits) {

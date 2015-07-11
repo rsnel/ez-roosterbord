@@ -1,0 +1,7 @@
+- arrow keys: up/down change week, left/right change target (if arrows are displayed)
+- display couplings between messages and entities in upload.php
+- make targets same width with selectbox if "<" and ">" are present
+- indicate empty moments (if a lesson is coupled to a room only, then this can't be
+  discerned from the display, which is bad)
+- on homepage: indicate in list who has changes 
+- allow "rlo" markup in short notices in lessons

@@ -323,6 +323,20 @@ function get_baselink() {
 	return 'http://'.$_SERVER['HTTP_HOST'].substr($_SERVER['PHP_SELF'], 0, $pos + 1);
 }
 
+function bbtohtml_rlo($t) {
+	$pattern['br'] = '/\[br\]/is';
+	$replacement['br'] = '<br>';
+	$pattern['b'] = '/\[b\](.+?)\[\/b\]/is';
+	$replacement['b'] = '<b>$1</b>';
+	$pattern['u'] = '/\[u\](.+?)\[\/u\]/is';
+	$replacement['u'] = '<ins>$1</ins>';
+	$pattern['i'] = '/\[i\](.+?)\[\/i\]/is';
+	$replacement['i'] = '$1';
+	$pattern['doc'] = '/\[doc\](.+?)\[\/doc\]/is';
+	$replacement['doc'] = '';
+	return preg_replace($pattern, $replacement, $t);
+}
+
 function bbtohtml($t) {
 	$pattern['url'] = '/\[url\=(.+?)\](.+?)\[\/url\]/is';
 	$replacement['url'] = '<a href="$1">$2</a>';

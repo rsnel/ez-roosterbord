@@ -112,25 +112,28 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 		while ($row[UUR] == $i) {
 			cleanup_row($row);
 			$extra = ''; $comment = '';
-			
+
+			// blokkeer html in NOTITIE(2) en transformeer bbcode
+			$row[NOTITIE] = bbtohtml_rlo(htmlenc($row[NOTITIE]));
+			$row[NOTITIE2] = bbtohtml_rlo(htmlenc($row[NOTITIE2]));
 			if ($row[WIJZ_ID]) { // deze les is: extra/nieuw, lokaalreservering, (fake)verplaatstvan of gewijzigd
 				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
 					if ($row[VAKKEN] == 'lok') {
 						$row[VAKKEN] = '';
 						$extra = ' lokaalreservering';
-						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.htmlenc($row[NOTITIE]).')';
+						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.$row[NOTITIE].')';
 						else $comment = '(lokaalreservering)';
 					} else if (preg_match('/^van /', $row[NOTITIE])) {
 						$extra = ' verplaatstvan';
-						$comment = '('.htmlenc($row[NOTITIE]).')';
+						$comment = '('.$row[NOTITIE].')';
 					} else {
 						$extra = ' extra';
 						if ($_GET['bw'] == 'x') {
 							$comment = ' (nieuw';
-							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">nieuw: </span>'.htmlenc($row[NOTITIE]);
+							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">nieuw: </span>'.$row[NOTITIE];
 						} else {
 							$comment = ' (extra';
-							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">extra: </span>'.htmlenc($row[NOTITIE]);
+							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">extra: </span>'.$row[NOTITIE];
 						}
 						$comment .= ')';
 					}
@@ -143,13 +146,13 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 								$row[LOKALEN] != $row[LOKALEN2]) {
 							$extra = ' gewijzigd';
 							$comment = '(was '.print_diff($row);
-							if ($row[NOTITIE] != '') $comment .= ', '.htmlenc($row[NOTITIE]);
+							if ($row[NOTITIE] != '') $comment .= ', '.$row[NOTITIE];
 							$comment .= ')';
 						}
 					} else {
 						$extra = ' verplaatstvan';
 						$comment = '(van '.print_diff($row);
-						if ($row[NOTITIE] != '') $comment .= ', '.htmlenc($row[NOTITIE]);
+						if ($row[NOTITIE] != '') $comment .= ', '.$row[NOTITIE];
 						$comment .= ')';
 					}
 				}
@@ -165,19 +168,19 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 						continue;
 					} else if (preg_match('/^naar /', $row[NOTITIE2])) {
 						$extra = ' verplaatstnaar';
-						$comment = '('.htmlenc($row[NOTITIE2]).')';
+						$comment = '('.$row[NOTITIE2].')';
 					} else if (preg_match('/^vrij( (.*))?$/', $row[NOTITIE2], $matches)) {
 						$extra = ' vrijstelling';
-						if ($matches[2] != '') $comment = '(<span class="onlyprint">vrijstelling: </span>'.htmlenc($matches[2]).')';
+						if ($matches[2] != '') $comment = '(<span class="onlyprint">vrijstelling: </span>'.$matches[2].')';
 						else $comment = '(vrijstelling)';
 					} else {
 						$extra = ' uitval';
 						if ($_GET['bw'] == 'x') {
 							$comment = ' (oud';
-							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">oud: </span>'.htmlenc($row[NOTITIE2]);
+							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">oud: </span>'.$row[NOTITIE2];
 						} else {
 							$comment = ' (uitval';
-							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">uitval: </span>'.htmlenc($row[NOTITIE2]);
+							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">uitval: </span>'.$row[NOTITIE2];
 						}
 						$comment .= ')';
 					}
@@ -193,7 +196,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 					} else {
 						$extra = ' verplaatstnaar';
 						$comment = '(naar '.print_diff($row);
-						if ($row[NOTITIE2] != '') $comment .= ', '.htmlenc($row[NOTITIE2]);
+						if ($row[NOTITIE2] != '') $comment .= ', '.$row[NOTITIE2];
 						$comment .= ')';
 					}
 				}
@@ -1323,25 +1326,28 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 
 			cleanup_row($row);
 			$extra = ''; $comment = '';
+			// blokkeer html in NOTITIE(2) en transformeer bbcode
+			$row[NOTITIE] = bbtohtml_rlo(htmlenc($row[NOTITIE]));
+			$row[NOTITIE2] = bbtohtml_rlo(htmlenc($row[NOTITIE2]));
 			
 			if ($row[WIJZ_ID]) { // deze les is: extra/nieuw, lokaalreservering, (fake)verplaatstvan of gewijzigd
 				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
 					if ($row[VAKKEN] == 'lok') {
 						$row[VAKKEN] = '';
 						$extra = ' lokaalreservering';
-						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.htmlenc($row[NOTITIE]).')';
+						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.$row[NOTITIE].')';
 						else $comment = '(lokaalreservering)';
 					} else if (preg_match('/^van /', $row[NOTITIE])) {
 						$extra = ' verplaatstvan';
-						$comment = '('.htmlenc($row[NOTITIE]).')';
+						$comment = '('.$row[NOTITIE].')';
 					} else {
 						$extra = ' extra';
 						if ($_GET['bw'] == 'x') {
 							$comment = ' (nieuw';
-							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">nieuw: </span>'.htmlenc($row[NOTITIE]);
+							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">nieuw: </span>'.$row[NOTITIE];
 						} else {
 							$comment = ' (extra';
-							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">extra: </span>'.htmlenc($row[NOTITIE]);
+							if ($row[NOTITIE] != '') $comment = '(<span class="onlyprint">extra: </span>'.$row[NOTITIE];
 						}
 						$comment .= ')';
 					}
@@ -1354,13 +1360,13 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 								$row[LOKALEN] != $row[LOKALEN2]) {
 							$extra = ' gewijzigd';
 							$comment = '(was '.print_diff($row);
-							if ($row[NOTITIE] != '') $comment .= ', '.htmlenc($row[NOTITIE]);
+							if ($row[NOTITIE] != '') $comment .= ', '.$row[NOTITIE];
 							$comment .= ')';
 						}
 					} else {
 						$extra = ' verplaatstvan';
 						$comment = '(van '.print_diff($row);
-						if ($row[NOTITIE] != '') $comment .= ', '.htmlenc($row[NOTITIE]);
+						if ($row[NOTITIE] != '') $comment .= ', '.$row[NOTITIE];
 						$comment .= ')';
 					}
 				}
@@ -1376,19 +1382,19 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 						continue;
 					} else if (preg_match('/^naar /', $row[NOTITIE2])) {
 						$extra = ' verplaatstnaar';
-						$comment = '('.htmlenc($row[NOTITIE2]).')';
+						$comment = '('.$row[NOTITIE2].')';
 					} else if (preg_match('/^vrij( (.*))?$/', $row[NOTITIE2], $matches)) {
 						$extra = ' vrijstelling';
-						if ($matches[2] != '') $comment = '(<span class="onlyprint">vrijstelling: </span>'.htmlenc($matches[2]).')';
+						if ($matches[2] != '') $comment = '(<span class="onlyprint">vrijstelling: </span>'.$matches[2].')';
 						else $comment = '(vrijstelling)';
 					} else {
 						$extra = ' uitval';
 						if ($_GET['bw'] == 'x') {
 							$comment = ' (oud';
-							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">oud: </span>'.htmlenc($row[NOTITIE2]);
+							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">oud: </span>'.$row[NOTITIE2];
 						} else {
 							$comment = ' (uitval';
-							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">uitval: </span>'.htmlenc($row[NOTITIE2]);
+							if ($row[NOTITIE2] != '') $comment = '(<span class="onlyprint">uitval: </span>'.$row[NOTITIE2];
 						}
 						$comment .= ')';
 					}
@@ -1404,7 +1410,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 					} else {
 						$extra = ' verplaatstnaar';
 						$comment = '(naar '.print_diff($row);
-						if ($row[NOTITIE2] != '') $comment .= ', '.htmlenc($row[NOTITIE2]);
+						if ($row[NOTITIE2] != '') $comment .= ', '.$row[NOTITIE2];
 						$comment .= ')';
 					}
 				}

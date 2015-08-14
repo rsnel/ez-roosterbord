@@ -9,6 +9,7 @@ function mobile_html() {
 $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 		   // al aan de beurt geweest zijn, zodat 'verplaatsing + uitval'
 		   // alleen 'verplaatsing' wordt
+
 	header("Content-Type: text/html; charset=UTF-8"); ?>
 <!DOCTYPE html>
 <html>
@@ -26,30 +27,68 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 <link rel="stylesheet" href="css/jquery.mobile-1.4.3.min.css">
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
-<? if (!isset($_GET['q']) || $_GET['q'] == '') { ?>
 <script type="text/javascript">
+<? if (!isset($_GET['q']) || $_GET['q'] == '') { ?>
 $(document).on('pageshow', function () {
 	$('#searchbar').val('');
 });
-</script>
 <? } ?>
+//]]>
+</script>
 </head>
 <body>
 <div data-role="page" id="main">
-<div data-role="header" data-position="fixed">
+<?
+
+$link_tail_wowk_dec = '&bw='.$_GET['bw'].'&wk=';
+$link_tail_tail_dec = (isset($_GET['debug'])?'&debug':'');
+	if ($prev_week === NULL && $_GET['dy'] == 1) $prev = '';
+	else $prev = '?q='.
+		urlencode($_GET['q']).
+		$link_tail_wowk_dec.
+		(($_GET['dy'] == 1)?$prev_week:(($safe_week == $default_week)?'':$safe_week)).
+		'&m&dy='.
+		(($_GET['dy'] == 1)?5:$_GET['dy']-1).
+		$link_tail_tail_dec;
+
+	if ($next_week === NULL && $_GET['dy'] == 5) $next = '';
+	else $next = '?q='.
+		urlencode($_GET['q']).
+		$link_tail_wowk_dec.
+		(($_GET['dy'] == 5)?$next_week:(($safe_week == $default_week)?'':$safe_week)).
+		'&m&dy='.
+		(($_GET['dy'] == 5)?1:$_GET['dy']+1).
+		$link_tail_tail_dec;
+?>
+<script type="text/javascript">
+//<![CDATA[
+function prev() {
+<? if ($prev != '') { ?>
+	$('body').pagecontainer('change', '<? echo($prev) ?>',
+		{ reverse: true, transition: 'slide' });
+<? } ?>
+}
+function next() {
+<? if ($next != '') { ?>
+	$('body').pagecontainer('change', '<? echo($next) ?>',
+		{ transition: 'slide' });
+<? } ?>
+}
+$('body').off('swiperight').on('swiperight', prev);
+$('body').off('swipeleft').on('swipeleft', next);
+//]]>
+</script>
+<div data-role="header" id="header" data-position="fixed">
 <a style="margin-left: 5px; margin-right: 5px" data-transition="slide" data-direction="reverse" class="ui-btn ui-btn-left ui-btn-inline ui-icon-carat-l ui-btn-icon-notext ui-corner-all<?
-	if($prev_week === NULL && $_GET['dy'] == 1) {
+	if($prev == '') {
 		?> ui-state-disabled<?
-	} ?>" href="?q=<?
-		echo(urlencode($_GET['q']).$link_tail_wowk.(($_GET['dy'] == 1)?$prev_week:(($safe_week == $default_week)?'':$safe_week)).'&amp;m&amp;dy='.(($_GET['dy'] == 1)?5:$_GET['dy']-1).$link_tail_tail)
-?>"></a>
+	} ?>" href="<? echo(htmlenc($prev)) ?>"></a>
 <div class="ui-btn-right">
-<a style="margin-left: 5px; margin-right: 5px; float: left" data-transition="slidefade" class="ui-btn ui-btn-inline ui-icon-home ui-btn-icon-notext ui-corner-all" href="?q=&amp;m<? echo($link_tail_tail); ?>"></a>
+<a style="margin-left: 5px; margin-right: 5px; float: left" data-direction="reverse" data-transition="pop" class="ui-btn ui-btn-inline ui-icon-home ui-btn-icon-notext ui-corner-all" href="?q=&amp;m<? echo($link_tail_tail); ?>"></a>
 <a style="margin-left: 5px; margin-right: 5px; float: left" data-transition="slide" class="ui-btn ui-btn-inline ui-icon-carat-r ui-btn-icon-notext ui-corner-all<?
 	if($next_week === NULL && $_GET['dy'] == 5) {
 		?> ui-state-disabled<?
-	} ?>" href="?q=<?
-		echo(urlencode($_GET['q']).$link_tail_wowk.(($_GET['dy'] == 5)?$next_week:(($safe_week == $default_week)?'':$safe_week)).'&amp;m&amp;dy='.(($_GET['dy'] == 5)?1:$_GET['dy']+1).$link_tail_tail);
+	} ?>" href="<? echo(htmlenc($next)) ?>"></a><?
 
 if ($safe_week < 30) {
 	        $year = substr(config('SCHOOLJAAR_LONG'), 5);
@@ -58,7 +97,7 @@ if ($safe_week < 30) {
 }
 $day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
 $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
-?>"></a>
+?>
 </div>
 <h1><?
 echo(config('SCHOOL_AFKORTING').' ');

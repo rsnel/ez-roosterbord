@@ -1,5 +1,13 @@
 <? require_once('common.php');
 
+function icons() { ?>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
+<link rel="shortcut icon" href="zermelo_zoom.ico">
+<?  }
+
 function mobile_html() {
 	global $result, $safe_week, $default_week, $day_not_given;
 	global $link_tail_wowk, $prev_week, $next_week, $link_tail_tail;
@@ -15,12 +23,8 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
-<link rel="shortcut icon" href="zermelo_zoom.ico">
 <meta name="msapplication-config" content="none">
+<? icons() ?>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/mobile.css">
@@ -309,11 +313,7 @@ function html_start($collapsed = false) {
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
-<link rel="shortcut icon" href="zermelo_zoom.ico">
+<? icons() ?>
 <meta name="msapplication-config" content="none">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">
@@ -531,11 +531,7 @@ EOQ
 <html>
 <head>
 <meta charset="UTF-8">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
-<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
-<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
-<link rel="shortcut icon" href="zermelo_zoom.ico">
+<? icons() ?>
 <meta name="msapplication-config" content="none">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">

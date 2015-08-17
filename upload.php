@@ -35,7 +35,12 @@ ORDER BY rooster_id DESC
 EOQ
 );
 	$berichten = mdb2_query(<<<EOQ
-SELECT bericht_id, bericht_title, bericht_visiblefrom, bericht_visibleuntil FROM berichten ORDER BY bericht_visibleuntil DESC
+SELECT bericht_id, bericht_title, bericht_visiblefrom, bericht_visibleuntil, IFNULL(GROUP_CONCAT(entity_name ORDER BY entity_name), 'Allen') targets
+FROM berichten
+LEFT JOIN entities2berichten USING (bericht_id)
+LEFT JOIN entities USING (entity_id)
+GROUP BY bericht_id
+ORDER BY bericht_visibleuntil DESC
 EOQ
 );
 
@@ -148,10 +153,10 @@ zijn, maximale grootte <? echo $upload_mb ?>MB.<br>
 <? $row = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC); 
 if (!$row) echo("<p>Er zijn geen actuele berichten.\n");
 else { ?>
-<table><tr><th>vanaf</th><th>tot</th><th>titel</th></tr>
+<table><tr><th>vanaf</th><th>tot</th><th>titel</th><th>target(s)</th></tr>
 <?
 	do { ?>
-<tr><td><? echo(date('Y-m-d', $row['bericht_visiblefrom'])) ?></td><td><? echo(date('Y-m-d', $row['bericht_visibleuntil'])) ?></td><td><? echo($row['bericht_title']) ?></td>
+		<tr><td><? echo(date('Y-m-d', $row['bericht_visiblefrom'])) ?></td><td><? echo(date('Y-m-d', $row['bericht_visibleuntil'])) ?></td><td><? echo($row['bericht_title']) ?></td><td><? echo($row['targets']) ?></td>
 <td><a href="bericht.php?bericht_id=<? echo($row['bericht_id']) ?>&amp;secret=<? echo($_GET['secret']) ?>">wijzig</a></td></tr>
 <?
 	} while ($row = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));

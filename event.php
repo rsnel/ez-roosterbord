@@ -136,7 +136,7 @@ $(function(){
  * - als de einddag niet is ingevuld, dan maken we hem gelijk aan de startdag
  * - als het startuur niet is ingevuld, dan mag het einduur ook niet ingevuld zijn en maken we ervan: 1 - 9
  *
- * Als het stof is neergedaald dan MAG het eind niet eerder zijn dan het begin (logisch toch?),
+ * Ook mag het eind niet eerder zijn dan het begin,
  * dus startweek &lt; eindweek OF (weken gelijk EN startdag &lt; einddag OF (dagen gelijk EN startuur &leq; einduur)) */
 </pre>
 <p><form method="POST" action="do_event.php" name="wijzig" accept-charset="UTF-8">
@@ -148,10 +148,10 @@ beschrijving: <input type="text" name="beschrijving" value="<? if (isset($event)
 <div id="accordion">
 <h3><a href="#">Categorie&euml;n (<? echo($count_categorieen); ?>)</a></h3>
 <div> <? foreach ($k_categorieen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
-<h3><a href="#">Stamklassen (<? echo($count_stamklassen); ?>)</a></h3>
+<!--<h3><a href="#">Stamklassen (<? echo($count_stamklassen); ?>)</a></h3>
 <div> <? foreach ($k_stamklassen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 <h3><a href="#">Lesgroepen (<? echo($count_lesgroepen); ?>)</a></h3>
-<div> <? foreach ($k_lesgroepen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
+<div> <? foreach ($k_lesgroepen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>-->
 </div>
 <input type="submit" name="submit" value="Opslaan">
 <? if (isset($_GET['event_id'])) { ?>

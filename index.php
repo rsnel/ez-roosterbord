@@ -1202,10 +1202,31 @@ function print_diff($row) {
 	return implode('/', $output);
 }
 
+function cleanup_flex(&$row) {
+	if (preg_match('/^(flex[1-4])(,flex[2-4])*$/', $row[VAKKEN])) {
+		$row[VAKKEN] = 'flex';
+		$row[LESGROEPEN] = '';
+	}
+	if (preg_match('/^(flex[1-4])(,flex[2-4])*$/', $row[VAKKEN2])) {
+		$row[VAKKEN2] = 'flex';
+		$row[LESGROEPEN2] = '';
+	}
+}
+
 function cleanup_row(&$row) {
 	if (config('HIDE_ROOMS')) {
 		$row[LOKALEN] = '';
 		if ($_GET['bw'] != 'b') $row[LOKALEN2] = '';
+	}
+	switch (config('CLEANUP_EXTRA')) {
+	case 'cleanup_flex':
+		cleanup_flex($row);
+		break;
+	case 'false':
+		break;
+	default:
+		fatal_error('unsupported value of config(CLEANUP_EXTRA) '.config(CLEANUP_EXTRA));
+		break;
 	}
 }
 	

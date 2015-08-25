@@ -57,6 +57,7 @@ $config_info = array(
 	'KLASSENBOEK_URL' => 'false',
 	'IGNORE_BEFORE_DOT' => '0',
 	'VAKMATCH' => 'vakmatch_default',
+	'CLEANUP_EXTRA' => 'false',
 	'MAX_LESUUR' => 9
 );
 

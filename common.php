@@ -58,6 +58,7 @@ $config_info = array(
 	'IGNORE_BEFORE_DOT' => '0',
 	'VAKMATCH' => 'vakmatch_default',
 	'CLEANUP_EXTRA' => 'false',
+	'SHOW_TEACHERNAMES' => '0',
 	'MAX_LESUUR' => 9
 );
 

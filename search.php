@@ -28,16 +28,31 @@ if (!$file_id) {
 	exit;
 }
 
-$query = <<<EOT
-SELECT entities.entity_name id, CONCAT(name, ' (', stamklassen.entity_name, '/', entities.entity_name, ')') value
+$list_teachers = '';
+if (config('SHOW_TEACHERNAMES')) {
+	$list_teachers = <<<EOQ
+UNION
+SELECT entity_name id, CONCAT(name, ' (', entity_name, ')') value, name
 FROM names
-JOIN entities ON names.entity_id = entities.entity_id
-JOIN grp2ppl ON ppl_id = names.entity_id
-JOIN entities AS stamklassen ON stamklassen.entity_id = lesgroep_id
-WHERE file_id_basis = $file_id AND stamklassen.entity_type = 5 AND name LIKE '%%%w%%' LIMIT 15
-EOT;
+JOIN entities USING (entity_id)
+WHERE entity_type = 2 AND entity_active IS NOT NULL
+EOQ;
+}
 
-$result = mdb2_query($query, $_GET['term']);
+$result= mdb2_query(<<<EOQ
+SELECT id, value, name FROM (
+	SELECT entities.entity_name id, CONCAT(name, ' (', stamklassen.entity_name, '/', entities.entity_name, ')') value, name
+	FROM names
+	JOIN entities ON names.entity_id = entities.entity_id
+	JOIN grp2ppl ON ppl_id = names.entity_id
+	JOIN entities AS stamklassen ON stamklassen.entity_id = lesgroep_id
+	WHERE file_id_basis = $file_id AND stamklassen.entity_type = 5
+	$list_teachers
+) AS tmp
+WHERE name LIKE '%%%w%%'
+LIMIT 15
+EOQ
+, $_GET['term']);
 
 header("Content-Type: application/json; charset=UTF-8");
 

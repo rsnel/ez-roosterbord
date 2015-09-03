@@ -1075,7 +1075,14 @@ case DOCENT:
 		$type = 'docenten '.split_links($entity_name);
 		$multiple_sort = ', f_docenten';
 	}
-	else $type = 'docent '.entity_prevnext($entity_name, DOCENT);
+	else {
+		if (binnen_school() && config('SHOW_TEACHERNAMES')) {
+			$name = mdb2_single_val("SELECT name FROM names WHERE entity_id = $safe_id");
+			$entity_name = mdb2_single_val("SELECT entity_name FROM entities WHERE entity_id = $safe_id");
+			$type = 'docent '.entity_prevnext($entity_name, DOCENT).(($name)?' ('.$name.')':'');
+		}
+		else $type = 'docent '.entity_prevnext($entity_name, DOCENT);
+	}
 	break;
 case LOKAAL:
 	if ($entity_multiple) {

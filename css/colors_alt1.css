@@ -1,0 +1,24 @@
+.uitval {
+	background-color: #ffb877;
+	font-style: italic;
+}
+.vrijstelling {
+	background-color: #b8dbff;
+	font-style: italic;
+}
+.lokaalreservering {
+	background-color: #6db6ff;
+}
+.verplaatstnaar {
+	background-color: #b66dff;
+	font-style: italic;
+}
+.verplaatstvan {
+	background-color: #dbd100;
+}
+.extra {
+	background-color: #24ff24;
+}
+.gewijzigd {
+	background-color: #ffff6d;
+}

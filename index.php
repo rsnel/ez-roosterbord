@@ -29,6 +29,7 @@ $dubbel = array(); // in deze array houden we bij welke zermelo_ids
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/mobile.css">
+<? if ($_GET['c'] == 'alt1') { ?><link rel="stylesheet" href="css/colors_alt1.css"><? } ?>
 <link rel="stylesheet" href="css/jquery.mobile-1.4.3.min.css">
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
@@ -128,6 +129,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <form id="search" method="GET" data-transition="pop" accept-charset="UTF-8">
 <input id="searchbar" type="search" name="q" placeholder="<? echo($entity_type === '' && $_GET['q'] != ''?'zoekterm '.htmlenc($_GET['q']).' niet gevonden':'klas, leerlingnr, docent, lokaal...'); ?>" value="<? echo(htmlenc($entity_name)) ?>">
 <input type="hidden" name="m">
+<input type="hidden" name="c" value="<? echo($_GET['c']) ?>">
 <input name="bw" type="hidden" value="<? echo($_GET['bw']) ?>">
 <input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">
 <input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
@@ -318,6 +320,7 @@ function html_start($collapsed = false) {
 <meta name="msapplication-config" content="none">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">
+<? if ($_GET['c'] == 'alt1') { ?><link rel="stylesheet" href="css/colors_alt1.css"><? } ?>
 <link rel="stylesheet" href="css/print.css" media="print">
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
@@ -372,6 +375,7 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 		else echo(' ('.$no_berichten.' berichten)');
 	}
 } ?>
+<input type="hidden" name="c" value="<? echo($_GET['c']) ?>">
 <input name="bw" type="hidden" value="<? echo($_GET['bw']) ?>">
 <input name="wk" type="hidden" value="<? if ($safe_week != $default_week) { echo($safe_week); } ?>">
 <input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
@@ -430,6 +434,7 @@ echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.
 <option <? if ($_GET['bw'] == 'x') echo('selected ') ?>value="x">basisrooster tov vorige week</option>
 </select>
 <input name="q" type="hidden" value="<? echo(htmlenc($_GET['q'])) ?>">
+<input type="hidden" name="c" value="<? echo($_GET['c']) ?>">
 <? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 </form>
 </div>
@@ -485,6 +490,8 @@ if (isset($_GET['m'])) $_GET['bw'] = 'w';
 if (!isset($_GET['bw'])) $_GET['bw'] = 'w';
 else if ($_GET['bw'] != 'w' && $_GET['bw'] != 'y' && $_GET['bw'] != 'b' && $_GET['bw'] != 'd' && $_GET['bw'] != 'x') $_GET['bw'] = 'w';
 
+if (!isset($_GET['c']) || ($_GET['c'] != 'default' && $_GET['c'] != 'alt1')) $_GET['c'] = 'default';
+
 // als de roosterwijzigingen uit staan, zijn de enige geldige opties 'b' en 'x'
 if (config('DISABLE_WIJZIGINGEN') && $_GET['bw'] != 'x') $_GET['bw'] = 'b';
 
@@ -536,6 +543,7 @@ EOQ
 <meta name="msapplication-config" content="none">
 <title>Roosterbord <? echo(config('SCHOOL_AFKORTING').' '.config('SCHOOLJAAR_LONG')) ?></title>
 <link rel="stylesheet" href="css/style.css">
+<? if ($_GET['c'] == 'alt1') { ?><link rel="stylesheet" href="css/colors_alt1.css"><? } ?>
 <link rel="stylesheet" href="css/print.css" media="print">
 <link rel="stylesheet" href="css/ui-lightness/jquery-ui-1.10.4.custom.min.css">
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
@@ -578,9 +586,9 @@ if ($next_week == $default_week) $next_week = '';
 
 if ($safe_week != $_GET['wk']) fatal_error('sanity check failed');
 
-// $_GET['bw'] and $_GET['dy'] are already sanitized at this point
+// $_GET['bw'], $_GET['c']  and $_GET['dy'] are already sanitized at this point
 $link_tail_wowk = '&amp;bw='.$_GET['bw'].'&amp;wk=';
-$link_tail_tail = (isset($_GET['debug'])?'&amp;debug':'');
+$link_tail_tail = '&amp;c='.$_GET['c'].(isset($_GET['debug'])?'&amp;debug':'');
 
 if ($safe_week != $default_week) $link_tail = $link_tail_wowk.$safe_week;
 else $link_tail = $link_tail_wowk;
@@ -1328,6 +1336,7 @@ if ($entity_type == STAMKLAS || $entity_type == LESGROEP || $entity_type == LEER
 <p>
 <? if ($entity_type == LESGROEP || $entity_type == STAMKLAS || $entity_type == CATEGORIE) { ?>
 <form method="GET" name="leerling" accept-charset="UTF-8">
+<input type="hidden" name="c" value="<? echo($_GET['c']) ?>">
 <input type="hidden" name="bw" value="<? echo($_GET['bw']) ?>">
 <input type="hidden" name="wk" value="<? echo($safe_week) ?>">
 <input name="dy" type="hidden" value="<? if (!$day_not_given) echo($_GET['dy']); ?>">
@@ -1519,6 +1528,11 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 <span class="legenda verplaatstnaar">&nbsp;</span>&nbsp;verplaatst naar,
 <span class="legenda vrijstelling">&nbsp;</span>&nbsp;vrijstelling,
 <span class="legenda lokaalreservering">&nbsp;</span>&nbsp;lokaalreservering.
+<span id="colorschemelinks">
+(versie: <? echo($_GET['c']) ?>, opties:
+<? if ($_GET['c'] != 'default') { ?><a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;c=default">[default]</a><? } ?>
+<? if ($_GET['c'] != 'alt1') { ?><a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;c=alt1">[alt1]</a><? } ?>)
+</span>
 </div><? } ?>
 </div><? } ?>
 <p>
@@ -1536,7 +1550,7 @@ Er is geen oud basisrooster<? } ?>
 <? } ?>.
 <? } ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
-Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m">mobiele versie</a> van het roosterbord!
+Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord!
 </span>
 
 <? html_end(); ?>

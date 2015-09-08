@@ -106,6 +106,9 @@ div.les:first-child {
 .les td {
 	border: 0px;
 }
+#colorschemelinks {
+	font-size: 9px;
+}
 #updateinfo {
 	font-size: 9px;
 }

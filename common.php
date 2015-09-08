@@ -458,9 +458,18 @@ function read_udmz_lines($lines) {
 	return $out;
 }
 
+// deze functie maakte voorheen gebruik van gzfile(), gzfile() kan
+// echter niet werken met regels die langer zijn dan 8192 tekens, dus
+// dat gaat mis, nu splitsen we de file 'met de hand'
 function read_udmz_file($file) {
-	if (!($lines = gzfile($file)))
-		fatal_error("unable to read and decompress $file");
+	$lines = array();
+	$fp = gzopen($file, 'rb');
+	if (!$fp) fatal_error("unable to open $file");
+	while (!feof($fp)) {
+		$line = fgets($fp);
+		if (!$line) fatal_error("unable to read from $file");
+		$lines[] = $line;
+	}
 	return read_udmz_lines($lines);
 }
 

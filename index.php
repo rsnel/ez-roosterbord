@@ -255,7 +255,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 
 			$info = array();
 			if ($row[VAKKEN] == 'flex' && config('CLEANUP_EXTRA') == 'cleanup_flex') {
-				add_flex($info, $row[LESGROEPEN]);
+				add_flex($info, $row['flex_info']);
 			} else {
 				add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
 			}

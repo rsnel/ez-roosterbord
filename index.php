@@ -254,8 +254,8 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 			}
 
 			$info = array();
-			if ($row[VAKKEN] == 'flex' && config('CLEANUP_EXTRA') == 'cleanup_flex') {
-				add_flex($info, $row['flex_info']);
+			if (isset($row['flex_info'])) {
+				add_flex($info, $row['flex_info'], $row[VAKKEN]);
 			} else {
 				add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
 			}
@@ -1229,9 +1229,16 @@ function cleanup_flex(&$row) {
 
 		$row[VAKKEN] = 'flex';
 		$row[LESGROEPEN] = '';
+	} else if (preg_match('/^(study[1-4])(,study[2-4])*$/', $row[VAKKEN])) {
+		$row['flex_info'] = $row[LESGROEPEN];
+		$row[VAKKEN] = 'study';
+		$row[LESGROEPEN] = '';
 	}
 	if (preg_match('/^(flex[1-4])(,flex[2-4])*$/', $row[VAKKEN2])) {
 		$row[VAKKEN2] = 'flex';
+		$row[LESGROEPEN2] = '';
+	} else if (preg_match('/^(study[1-4])(,study[2-4])*$/', $row[VAKKEN2])) {
+		$row[VAKKEN2] = 'study';
 		$row[LESGROEPEN2] = '';
 	}
 }
@@ -1257,8 +1264,8 @@ function enccommabr($string) {
 	return implode('<br>', explode(',', htmlenc($string)));
 }
 
-function add_flex(&$info, $lesgroepen) {
-	$info[] = make_link($lesgroepen, 'flex');
+function add_flex(&$info, $lesgroepen, $vak) {
+	$info[] = make_link($lesgroepen, $vak);
 }
 
 function add(&$info, $name, $void = '') {
@@ -1507,8 +1514,8 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 			}
 
 			$info = array();
-			if ($row[VAKKEN] == 'flex' && config('CLEANUP_EXTRA') == 'cleanup_flex') {
-				add_flex($info, $row['flex_info']);
+			if (isset($row['flex_info'])) {
+				add_flex($info, $row['flex_info'], $row[VAKKEN]);
 			} else {
 				add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
 			}

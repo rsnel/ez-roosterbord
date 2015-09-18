@@ -254,7 +254,11 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 			}
 
 			$info = array();
-			add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
+			if (isset($row['flex_info'])) {
+				add_flex($info, $row['flex_info'], $row[VAKKEN]);
+			} else {
+				add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
+			}
 			add($info, $row[DOCENTEN], ($row[WIJZ_ID] && $row[DOCENTEN2])?'<span class="unknown">DOC?</span>':'');
 			add($info, $row[LOKALEN], ($row[WIJZ_ID] && $row[LOKALEN2])?'<span class="unknown">LOK?</span>':'');
 
@@ -1219,11 +1223,22 @@ function print_diff($row) {
 
 function cleanup_flex(&$row) {
 	if (preg_match('/^(flex[1-4])(,flex[2-4])*$/', $row[VAKKEN])) {
+		// we slaan de lesgroepen elders op om later een
+		// link ernaartoe te kunnen maken
+		$row['flex_info'] = $row[LESGROEPEN];
+
 		$row[VAKKEN] = 'flex';
+		$row[LESGROEPEN] = '';
+	} else if (preg_match('/^(study[1-4])(,study[2-4])*$/', $row[VAKKEN])) {
+		$row['flex_info'] = $row[LESGROEPEN];
+		$row[VAKKEN] = 'study';
 		$row[LESGROEPEN] = '';
 	}
 	if (preg_match('/^(flex[1-4])(,flex[2-4])*$/', $row[VAKKEN2])) {
 		$row[VAKKEN2] = 'flex';
+		$row[LESGROEPEN2] = '';
+	} else if (preg_match('/^(study[1-4])(,study[2-4])*$/', $row[VAKKEN2])) {
+		$row[VAKKEN2] = 'study';
 		$row[LESGROEPEN2] = '';
 	}
 }
@@ -1247,6 +1262,10 @@ function cleanup_row(&$row) {
 	
 function enccommabr($string) {
 	return implode('<br>', explode(',', htmlenc($string)));
+}
+
+function add_flex(&$info, $lesgroepen, $vak) {
+	$info[] = make_link($lesgroepen, $vak);
 }
 
 function add(&$info, $name, $void = '') {
@@ -1495,7 +1514,11 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 			}
 
 			$info = array();
-			add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
+			if (isset($row['flex_info'])) {
+				add_flex($info, $row['flex_info'], $row[VAKKEN]);
+			} else {
+				add_lv($info, $row[LESGROEPEN], $row[VAKKEN]);
+			}
 			add($info, $row[DOCENTEN], ($row[WIJZ_ID] && $row[DOCENTEN2])?'<span class="unknown">DOC?</span>':'');
 			add($info, $row[LOKALEN], ($row[WIJZ_ID] && $row[LOKALEN2])?'<span class="unknown">LOK?</span>':'');
 

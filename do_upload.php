@@ -445,7 +445,14 @@ function import_wijzigingen($file_id, $week, $tmp_name, $basis_id) {
 	lock_renew_helper(1);
 
 	// fill stamz array, so stuff like 2A.2A1A can be changed to 2A1A
-	$stamz = mdb2_all_assoc_rekey('SELECT entities.entity_name, entities2.entity_name AS value FROM entities JOIN grp2grp ON grp2grp.lesgroep_id = entities.entity_id JOIN entities AS entities2 ON entities2.entity_id = grp2grp.lesgroep2_id AND entities2.entity_type = '.CATEGORIE.' WHERE entities.entity_type = '.STAMKLAS);
+	$stamz = mdb2_all_assoc_rekey(<<<EOQ
+SELECT entities.entity_name, entities2.entity_name AS value
+FROM entities
+JOIN grp2grp ON grp2grp.lesgroep_id = entities.entity_id AND grp2grp.file_id_basis = $basis_id
+JOIN entities AS entities2 ON entities2.entity_id = grp2grp.lesgroep2_id AND entities2.entity_type = %i
+WHERE entities.entity_type = %i
+EOQ
+, CATEGORIE, STAMKLAS);
 
 	// als de roostermakers roosterwijzigingen wissen, dan zou de wijzigingenfile kleiner moeten worden
 	// zermelo doet overwrite zonder truncate, na het wissen van roosterwijzigingen kunnen secties dubbel

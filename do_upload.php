@@ -300,6 +300,11 @@ function import_basisrooster($file_id, $tmp_name) {
 	mdb2_exec("DELETE FROM grp2ppl WHERE file_id_basis = $file_id");
 	mdb2_exec("DELETE FROM grp2grp WHERE file_id_basis = $file_id");
 
+	if (count($udmz['Tijdpatroon']['Tijdvak']) > 1) {
+		logit('geuploade udmz bevat meer dan 1 tijdvak, ez-roosterbord kan daar (nog) niks mee');
+		return;
+	}
+
 	// eerst lopen we alle leerlingen langs
 	// dan alle docenten
 	// dan alle groepen

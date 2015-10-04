@@ -619,7 +619,7 @@ if (!$week_info) fatal_error("impossible, week $safe_week bestaat niet in tabel 
 $week_id = $week_info[0];
 
 if ($_GET['bw'] != 'x') {
-	$basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $week_id AND wijz_id = 0 ORDER BY rooster_id DESC LIMIT 1");
+	$basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $week_id AND wijz_id = 0 ORDER BY week_id DESC, rooster_id DESC LIMIT 1");
 	if (!$basis) fatal_error("impossible: toch geen basisrooster in deze week?!?!?!?");
 	$wijz = mdb2_single_assoc("SELECT file_id, wijz_id, timestamp FROM roosters WHERE week_id = $week_id AND basis_id = {$basis['basis_id']} ORDER BY rooster_id DESC LIMIT 1");
 	if ($basis['file_id'] == $wijz['file_id'] || !$wijz['file_id']) $wijz['file_id'] = 0;
@@ -628,12 +628,12 @@ if ($_GET['bw'] != 'x') {
 	if (!$wijz) {
 		// als er in een week geen basisrooster staat (dus impliciet een oud basisrooster)
 		// dan zijn $basis en $wijz gelijk
-		$wijz = $basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $week_id AND wijz_id = 0 ORDER BY rooster_id DESC");
+		$wijz = $basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $week_id AND wijz_id = 0 ORDER BY week_id DESC, rooster_id DESC LIMIT 1");
 	} else {
 		$basis = array();
 		if ($real_prev_week) {
 			$old_week_id = mdb2_single_val("SELECT week_id FROM weken WHERE week = $real_prev_week LIMIT 1");
-			$basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $old_week_id AND wijz_id = 0 ORDER BY rooster_id DESC");
+			$basis = mdb2_single_assoc("SELECT file_id, basis_id, timestamp FROM roosters WHERE week_id <= $old_week_id AND wijz_id = 0 ORDER BY week_id DESC, rooster_id DESC");
 		}
 	}
 	if (!$basis) {

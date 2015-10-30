@@ -10,6 +10,7 @@ $config = array(
 	'INTERNAL_IPS' => array('127.0.0.1/0' , '172.16.0.0/20'),
 	'SCHOOL_VOLUIT' => 'Oostvaarders College',
 	'SCHOOL_AFKORTING' => 'OVC',
+	'VERBERG_EXTRA_LESSEN_MET_DEZE_VAKKEN' => array('schoolactiviteit' => 1),
 	'ZERMELO_CATEGORY_IGNORE' =>  array('OVERIG', '#uit', 'Algemeen'),
 	'ZERMELO_GROUP_IGNORE' => array('#allen'),
         'ZERMELO_ENCODING' =>  'ISO-8859-1'

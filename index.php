@@ -1433,6 +1433,7 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 						$extra = ' verplaatstvan';
 						$comment = '('.$row[NOTITIE].')';
 					} else {
+						if (isset(config('VERBERG_EXTRA_LESSEN_MET_DEZE_VAKKEN')[$row[VAKKEN]])) continue;
 						$extra = ' extra';
 						if ($_GET['bw'] == 'x') {
 							$comment = ' (nieuw';

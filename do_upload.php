@@ -199,7 +199,7 @@ EOT
 
 		foreach ($entity_ids as $entity_id) add_entities2lessen($entity_id, $les_id);
 	}
-	mdb2_exec("INSERT INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
+	mdb2_exec("INSERT IGNORE INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
 }
 
 function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {

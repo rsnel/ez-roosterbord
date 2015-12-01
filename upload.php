@@ -44,6 +44,11 @@ ORDER BY bericht_visibleuntil DESC
 EOQ
 );
 
+$hide_rooms_select = '<select name="hide_rooms_since_week_id"><option value="0">altijd</option>'.mdb2_single_val(<<<EOQ
+SELECT GROUP_CONCAT(CONCAT('<option ', IF(week_id = '%q', 'selected ', ''), 'value="', week_id, '">', week, '</option>') SEPARATOR '') FROM weken
+EOQ
+, config(HIDE_ROOMS_SINCE_WEEK_ID)).'</select>';
+
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -176,7 +181,7 @@ else { ?>
 
 <h3>Configuratie</h3>
 <form action="do_config.php" method="POST">
-Verberg lokalen <input <? if (config('HIDE_ROOMS')) { ?>checked <? } ?>type="checkbox" name="hide_rooms" value="1">
+Verberg lokalen <input <? if (config('HIDE_ROOMS')) { ?>checked <? } ?>type="checkbox" name="hide_rooms" value="1"> startend in week <? echo($hide_rooms_select) ?>.
 <br>Verberg leerlingen <input <? if (config('HIDE_STUDENTS')) { ?>checked <? } ?>type="checkbox" name="hide_students" value="1">
 <br>Toon test waarschuwing <input <? if (config('ENABLE_TEST_WARNING')) { ?>checked <? } ?>type="checkbox" name="enable_test_warning" value="1">
 <input type="hidden" name="secret" value="<? echo(urlencode($_GET['secret'])) ?>">

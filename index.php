@@ -648,7 +648,7 @@ if ($_GET['bw'] != 'x') {
 $result = mdb2_query("SELECT entity_type, entity_id, entity_name FROM entities WHERE entity_name = '%q'", trim($qs[0]));
 
 if (!($target = $result->fetchRow()) ||
-	($target[0] == LOKAAL && config('HIDE_ROOMS')) ||
+	($target[0] == LOKAAL && config('HIDE_ROOMS') && $week_id >= config('HIDE_ROOMS_SINCE_WEEK_ID')) ||
 	($target[0] == LEERLING && config('HIDE_STUDENTS'))
 ) { // niet gevonden
 	$safe_id = '';
@@ -736,7 +736,7 @@ EOQ
 	$cols = $res->getColumnNames(1);
 	echo(implode("\t", $cols)."\n");
 	while ($row = $res->fetchRow(MDB2_FETCHMODE_ASSOC)) {
-		if (config('HIDE_ROOMS')) $row['lokalen'] = '';
+		if (config('HIDE_ROOMS') && $week_id >= config('HIDE_ROOMS_SINCE_WEEK_ID')) $row['lokalen'] = '';
 		echo(implode("\t", $row)."\n");
 	}
 	exit;
@@ -1244,7 +1244,8 @@ function cleanup_flex(&$row) {
 }
 
 function cleanup_row(&$row) {
-	if (config('HIDE_ROOMS')) {
+	global $week_id;
+	if (config('HIDE_ROOMS') && $week_id >= config('HIDE_ROOMS_SINCE_WEEK_ID')) {
 		$row[LOKALEN] = '';
 		if ($_GET['bw'] != 'b') $row[LOKALEN2] = '';
 	}
@@ -1336,7 +1337,7 @@ if ($entity_type === '') {
 	while ($row = $res_klas->fetchRow()) echo(' '.make_link($row[0]));
 	echo('<p>Docenten:');
 	while ($row = $res_doc->fetchRow()) echo(' '.make_link($row[0]));
-	if (!config('HIDE_ROOMS')) {
+	if (!config('HIDE_ROOMS') || $week_id < config('HIDE_ROOMS_SINCE_WEEK_ID')) {
 		echo('<p>Lokalen:');
 		while ($row = $res_lok->fetchRow()) echo(' '.make_link($row[0]));
 	}

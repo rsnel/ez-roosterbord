@@ -51,6 +51,7 @@ $config_info = array(
 	'ENABLE_TEST_WARNING' => '0',
 	'HIDE_STUDENTS' => '0',
 	'HIDE_ROOMS' => '0',
+	'HIDE_ROOMS_SINCE_WEEK_ID' => '0',
 	'SCHOOLJAAR_LONG' => '2015/2016',
 	'SHOWHIDE_STUDENTNAMES' => '0',
 	'DISABLE_WIJZIGINGEN' => '0',

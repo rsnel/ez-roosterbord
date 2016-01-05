@@ -2,6 +2,22 @@
 
 $PID = getmypid();
 
+$groepvak = explode('/', $_GET['q']);
+$q = $groepvak[0];
+$result = mdb2_query(<<<EOQ
+SELECT entity_id, entity_name
+FROM $roosterdb.entities
+WHERE entity_name = '%q'
+AND ( entity_type = 4 OR entity_type = 5 )
+EOQ
+       , $q);
+
+if (!($row = $result->fetchRow()))
+	goto start_html;
+
+$safe_id = $row[0];
+if (isset($groepvak[1])) $vak = $groepvak[1];
+else $vak = NULL;
 
 $min_week_id = mdb2_single_val("SELECT MIN(week_id) FROM roosters");
 if ($min_week_id) {
@@ -15,12 +31,15 @@ if (config('DISABLE_WIJZIGINGEN')) fatal_error('not supported');
 
 if (!$min_week_id) fatal_error('nog geen rooster :(');
 
+$target = $safe_id;
+/*
 $target = mdb2_single_val("SELECT entity_id FROM entities WHERE entity_name LIKE '%q'", $_GET['q']);
 
 if (!$target) {
 	//fatal_error('entity "'.$_GET['q'].'" niet gevonden');
 	goto start_html;
 }
+ */
 
 $weken = mdb2_query(<<<EOQ
 SELECT weken.week_id, week, roosters.basis_id, roosters.wijz_id, roosters.rooster_id, ma, di, wo, do, vr FROM roosters
@@ -86,6 +105,15 @@ define('VIS2', 18);*/
 //        s.dag AS s_dag, s.uur AS s_uur, s.notitie AS s_notitie, vis, vis2, 
 // -- , ' ', f.lesgroepen, '/', f.vakken, '/', f.docenten, '/', f.lokalen) les,
 
+$include = '-- %q';
+if ($vak) $include = <<<EOQ
+JOIN entities2lessen AS vakken2lessen
+ON vakken2lessen.les_id = f.les_id
+JOIN entities AS vakken
+ON vakken.entity_id = vakken2lessen.entity_id
+AND vakken.entity_name = CONCAT('/', '%q')
+EOQ;
+
 $file_id_basis = 0;
 $data = array();
 while ($row = $weken->fetchRow(MDB2_FETCHMODE_ASSOC)) {
@@ -96,9 +124,10 @@ while ($row = $weken->fetchRow(MDB2_FETCHMODE_ASSOC)) {
 	//echo("week {$row['week']} file_id_basis $file_id_basis, file_id_wijz $file_id_wijz<br>");
 	$subquery = rquery($target, $target, $file_id_basis, $file_id_wijz, 'LEFT ');
 	$data[$row['week']] = mdb2_query(<<<EOQ
+SELECT * FROM  (
 SELECT
 CONCAT(CASE WHEN f.dag = 1 THEN 'ma' WHEN f.dag = 2 THEN 'di' WHEN f.dag = 3 THEN 'wo' WHEN f.dag = 4 THEN 'do' WHEN f.dag = 5 THEN 'vr' END, f.uur) les,
-IFNULL(GROUP_CONCAT(events.beschrijving), IF(s.dag = 0 OR (f.dag = 1 AND ma = 0) OR (f.dag = 2 AND di = 0) OR (f.dag = 3 AND wo = 0) OR (f.dag = 4 AND do = 0) OR (f.dag = 5 AND vr = 0), 'uitval', '-')) activiteit
+IFNULL(GROUP_CONCAT(events.beschrijving), IF(s.dag = 0 OR (f.dag = 1 AND ma = 0) OR (f.dag = 2 AND di = 0) OR (f.dag = 3 AND wo = 0) OR (f.dag = 4 AND do = 0) OR (f.dag = 5 AND vr = 0), 'uitval', '-')) activiteit, f.dag, f.uur
 FROM ( $subquery ) AS sub
 JOIN weken ON week_id = {$row['week_id']}
 JOIN lessen AS f ON f.les_id = f_id
@@ -116,11 +145,13 @@ LEFT JOIN (
 ) AS events
 ON 10*(8*events.start_week_id + events.start_dag) + events.start_uur <= 10*(8*{$row['week_id']} + f.dag) + f.uur
 AND 10*(8*events.eind_week_id + events.eind_dag) + events.eind_uur >= 10*(8*{$row['week_id']} + f.dag) + f.uur
+$include
 WHERE f.lesgroepen IS NOT NULL AND f.dag != 0 AND f.uur != 0 AND (wijz = 1 OR s_zid IS NULL OR s.dag = 0)
 GROUP BY f_zid, wijz
-ORDER BY f.dag, f.uur
+) AS bla
+ORDER BY dag, uur, CASE WHEN activiteit = '-' THEN 0 ELSE 1 END
 EOQ
-);
+, $vak);
 }
 
 start_html:
@@ -161,19 +192,37 @@ table * td, table * th {
 <div class="noprint">
 <form>
 <input type="submit" value="Zoek">
-<input type="text" name="q"> (bijvoorbeeld <code>6V.wisB2</code>, momenteel werkt het systeem alleen voor clusters)
+<input type="text" name="q"> (bijvoorbeeld <code>6V.wisB2</code> of <code>6V1/entl</code>)
 </form>
 </div>
 <? if ($target) { ?>
 <h3>Jaarkalender van <? echo(htmlenc($_GET['q'])) ?></h3>
-<table style="width: 100%"><tr><th>week</th><th>lessen</th></tr>
+<table style="width: 100%"><tr><th>week</th><th>aantal</th><th>lessen</th></tr>
 <? //mdb2_res_table($weken); ?>
 <?
+$totaallessen = 0;
 $lessen = 0;
+$perweek = array();
 $uitval = 0;
 foreach ($data as $key => $value) {
-	?><tr><td><? echo($key) ?></td><?
+	$lastles = '';
+	$perweek[$key] = 0;
 	while ($row = $value->fetchRow()) {
+		if ($lastles == $row[0]) continue;
+		$lastles = $row[0];
+		if ($row[1]  == '-') {
+			$totaallessen++;
+			$perweek[$key]++;
+		}
+	}
+	$value->seek();
+}
+foreach ($data as $key => $value) {
+	?><tr><td><? echo($key) ?></td><td><? echo($perweek[$key].' ('.$lessen.'/'.($totaallessen - $lessen).')'); ?></td><?
+	$lastles = '';
+	while ($row = $value->fetchRow()) {
+		if ($lastles == $row[0]) continue;
+		$lastles = $row[0];
 		if ($row[1]  != '-') $uitval++;
 		else $lessen++;
 	?><td><? echo($row[0].' '.$row[1]) ?></td><?

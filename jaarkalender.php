@@ -11,10 +11,30 @@ WHERE entity_name = '%q'
 EOQ
        , $q);
 
+$select_lijst = NULL;
+
 if (!($row = $result->fetchRow()))
 	goto start_html;
 
-if ($row[2] != STAMKLAS && $row[2] != LESGROEP) {
+if (($row[2] != STAMKLAS || count($groepvak) == 1)  && $row[2] != LESGROEP) {
+	$entity_name = $row[1];
+	$file_id = mdb2_single_val(<<<EOQ
+SELECT file_id FROM $roosterdb.files
+WHERE file_type = 1 AND file_status = 1
+ORDER BY file_version DESC
+LIMIT 1
+EOQ
+);
+	$select_lijst = mdb2_query(<<<EOQ
+SELECT DISTINCT CASE WHEN lesgroepen.entity_type = 4 THEN lesgroepen.entity_name ELSE CONCAT(lesgroepen.entity_name, '/', lessen.vakken) END name FROM lessen
+JOIN files2lessen USING (les_id)
+JOIN entities2lessen AS lesgroepen2lessen USING (les_id)
+JOIN entities AS lesgroepen USING (entity_id)
+JOIN entities2lessen USING (les_id)
+WHERE entities2lessen.entity_id = {$row[0]} AND file_id = $file_id  AND (lesgroepen.entity_type = %i OR lesgroepen.entity_type = %i)
+ORDER BY name
+EOQ
+, LESGROEP, STAMKLAS);
 	goto start_html;
 }
 
@@ -190,7 +210,29 @@ table .shrink {
 table .expand {
 }
 </style>
+<style media="screen">
+body {
+        background-color: #E6E6FA;
+}
+div.page {
+        background-color: white;
+        padding: 1.5cm;
+        width: 180mm;
+        height: 267mm;
+        margin: .5cm auto;
+        border: 1px solid;
+        box-shadow: 10px 10px 5px #888888;
+
+}
+</style>
 <style media="print">
+@page {
+	size: a4 portrait;
+	margin: 1.5cm;
+}
+div.page+div.page {
+        page-break-before: always;
+}
 .noprint {
 	display: none;
 }
@@ -198,16 +240,22 @@ table .expand {
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script type="text/javascript" src="js/jquery.iframe-post-form.js"></script>
+<script type="text/javascript">
+$(function() {
+	$('#box').focus();
+});
+</script>
 </head>
 <body>
 <div id="content">
 <div class="noprint">
 <form>
 <input type="submit" value="Zoek">
-<input type="text" name="q"> (bijvoorbeeld <code>6V.wisB2</code> of <code>6V1/entl</code>)
+<input id="box" type="text" name="q"> (bijvoorbeeld <code>6V.wisB2</code> of <code>6V1/entl</code>)
 </form>
 </div>
 <? if ($target) { ?>
+<div class="page">
 <h3>Jaarkalender van <? echo(htmlenc($_GET['q'])) ?></h3>
 <table style="width: 100%"><tr><th>week</th><th>aantal</th><th>lessen</th></tr>
 <? //mdb2_res_table($weken); ?>
@@ -248,9 +296,19 @@ foreach ($data as $key => $value) {
 ?>
 </table>
 Beschikbaar lessen: <? echo($lessen) ?>, uitval <? echo($uitval) ?>.
-<? } else if (trim($_GET['q'])) { ?>
+</div>
+<? } else if (trim($_GET['q'])) {
+	if (!$select_lijst) {
+?>
 <span style="color: red">"<? echo(htmlenc($_GET['q'])) ?>" niet gevonden</span>
-<? } ?>
+<? } else {
+?><h3>Lesgroepen/stamklassen+vak horende bij <? echo(htmlenc($entity_name)); ?></h3><ul><?
+	while (($row = $select_lijst->fetchRow())) {
+	?><li><a href="jaarkalender.php?q=<? echo($row[0]) ?>"><? echo($row[0]) ?></a></li><?
+	}
+?></ul><?
+	}
+} ?>
 </div>
 </body>
 </html>

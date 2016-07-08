@@ -4,6 +4,7 @@ $PID = getmypid();
 
 $groepvak = explode('/', $_GET['q']);
 $q = $groepvak[0];
+if ($q == '' && count($groepvak) == 2) $q = $_GET['q'];
 $result = mdb2_query(<<<EOQ
 SELECT entity_id, entity_name, entity_type
 FROM $roosterdb.entities
@@ -16,8 +17,9 @@ $select_lijst = NULL;
 if (!($row = $result->fetchRow()))
 	goto start_html;
 
+$entity_name = $row[1];
+
 if (($row[2] != STAMKLAS || count($groepvak) == 1)  && $row[2] != LESGROEP) {
-	$entity_name = $row[1];
 	$file_id = mdb2_single_val(<<<EOQ
 SELECT file_id FROM $roosterdb.files
 WHERE file_type = 1 AND file_status = 1
@@ -256,7 +258,7 @@ $(function() {
 </div>
 <? if ($target) { ?>
 <div class="page">
-<h3>Jaarkalender van <? echo(htmlenc($_GET['q'])) ?></h3>
+<h3>Jaarkalender van <? echo(htmlenc($entity_name)) ?></h3>
 <table style="width: 100%"><tr><th>week</th><th>aantal</th><th>lessen</th></tr>
 <? //mdb2_res_table($weken); ?>
 <?

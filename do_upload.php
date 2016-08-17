@@ -60,8 +60,9 @@ function add_basis_grp2ppl($lesgroep_id, $ppl_id, $file_id_basis, $naam = NULL) 
 	$grp2ppl[$lesgroep_id][$ppl_id] = 1;
 }
 
+// soms staan er dingen dubbel in een les, niet over struikelen, maar gewoon doorgaan
 function add_entities2lessen($entity_id, $les_id) {
-	mdb2_exec("INSERT INTO entities2lessen ( entity_id, les_id ) VALUES ( $entity_id, $les_id )");
+	mdb2_exec("INSERT IGNORE INTO entities2lessen ( entity_id, les_id ) VALUES ( $entity_id, $les_id )");
 }
 
 // deze functie wordt alleen gebruikt om roosterwijzigingen in het oude

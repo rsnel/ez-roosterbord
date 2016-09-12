@@ -28,7 +28,7 @@ EOQ
 );  
 
 $res_geupload = mdb2_query(<<<EOQ
-SELECT week, basis_id, wijz_id, $sub0 file_name, FROM_UNIXTIME(timestamp) timestamp, IFNULL(file_version, '-') file_version FROM roosters
+SELECT week, basis_id, wijz_id, file_id, $sub0 file_name, FROM_UNIXTIME(timestamp) timestamp, IFNULL(file_version, '-') file_version FROM roosters
 JOIN weken USING (week_id)
 JOIN files USING (file_id)
 ORDER BY rooster_id DESC

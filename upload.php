@@ -47,7 +47,7 @@ EOQ
 $hide_rooms_select = '<select name="hide_rooms_since_week_id"><option value="0">altijd</option>'.mdb2_single_val(<<<EOQ
 SELECT GROUP_CONCAT(CONCAT('<option ', IF(week_id = '%q', 'selected ', ''), 'value="', week_id, '">', week, '</option>') SEPARATOR '') FROM weken
 EOQ
-, config(HIDE_ROOMS_SINCE_WEEK_ID)).'</select>';
+, config('HIDE_ROOMS_SINCE_WEEK_ID')).'</select>';
 
 ?>
 <!DOCTYPE HTML>

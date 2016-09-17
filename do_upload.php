@@ -131,7 +131,7 @@ function addslash($string) {
 	return '/'.$string;
 }
 
-// Zermelog geeft in het nieuwe format van de roosterwijzigingen de zermelo_id
+// Zermelo geeft in het nieuwe format van de roosterwijzigingen de zermelo_id
 // er niet meer bij, het systeem moet nu in het basisrooster gaan zoeken welke les er
 // eigenlijk wijzigt, merk op dat als een les aan meerdere lesgroepen wordt gegeven, deze
 // groepen worden gescheiden door een slash '/', maar als er meerdere doceten/lokalen/vakken

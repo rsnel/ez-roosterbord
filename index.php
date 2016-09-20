@@ -488,6 +488,8 @@ if ($min_week_id) {
 	$res->free();
 } else $weken = array();
 
+$lescounter = -1;
+
 // force weekrooster in mobile mode
 if (isset($_GET['m'])) $_GET['bw'] = 'w';
 
@@ -1372,7 +1374,7 @@ if ($safe_week < 30) {
 $day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
 $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 $enable_edit = get_enable_edit($_GET['bw']);
-
+$lescounter = 0;
 ?>
 <p><table id="rooster">
 <tr><th></th>
@@ -1397,6 +1399,7 @@ $enable_edit = get_enable_edit($_GET['bw']);
 			$row[NOTITIE2] = bbtohtml_rlo(htmlenc($row[NOTITIE2]));
 			
 			if ($row[WIJZ_ID]) { // deze les is: extra/nieuw, lokaalreservering, (fake)verplaatstvan of gewijzigd
+				$lescounter++;
 				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
 					if ($row[VAKKEN] == 'lok') {
 						$row[VAKKEN] = '';
@@ -1422,6 +1425,7 @@ $enable_edit = get_enable_edit($_GET['bw']);
 						$comment .= ')';
 					}
 				} else { // bij deze les hoort een oude les, dus gewijzigd of verplaatstvan
+					$lescounter++;
 					// staat de les op hetzelfde uur en is de oude les zichtbaar in dit rooster?
 					if ($row[UUR] == $row[UUR2] && $row[DAG] == $row[DAG2] && $row[VIS]) {
 						if ($row[LESGROEPEN] != $row[LESGROEPEN2] ||
@@ -1488,6 +1492,7 @@ $enable_edit = get_enable_edit($_GET['bw']);
 				$extra = ' vrijstelling';
 				$comment = '(vrijstelling)';
 			} else { // dit is een gewone les
+				$lescounter++;
 				if ($row[NOTITIE]) $comment = ' ('.$row[NOTITIE].')';
 			}
 
@@ -1556,7 +1561,7 @@ Er is geen oud basisrooster<? } ?>
 <? } ?>.
 <? } ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
-Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord!
+Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster.<? } ?>
 </span>
 
 <? html_end(); ?>

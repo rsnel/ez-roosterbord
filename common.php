@@ -60,7 +60,9 @@ $config_info = array(
 	'VAKMATCH' => 'vakmatch_default',
 	'CLEANUP_EXTRA' => 'false',
 	'SHOW_TEACHERNAMES' => '0',
-	'MAX_LESUUR' => 9
+	'MAX_LESUUR' => 9,
+	'ENABLE_EDIT_WIJZ' => 'false',
+	'GEMACHTIGD_EDIT_WIJZ' => 'roostermakers'
 );
 
 // get config from database and set all unconfigured items to default values
@@ -105,6 +107,15 @@ function config($key) {
 	 */
 
 	return $config_static[$key];
+}
+
+function get_enable_edit($bw = 'w') {
+	if (($bw == 'w' || $bw == 'd') && config('ENABLE_EDIT_WIJZ') == 'true') {
+		if (in_array($_SERVER['PHP_AUTH_USER'], explode(',', config('GEMACHTIGD_EDIT_WIJZ')))) return true;
+	}
+
+	return false;
+
 }
 
 function check_roostermaker($secret) {

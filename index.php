@@ -1371,6 +1371,7 @@ if ($safe_week < 30) {
 }
 $day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
 $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
+$enable_edit = get_enable_edit($_GET['bw']);
 
 ?>
 <p><table id="rooster">
@@ -1502,6 +1503,11 @@ $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 			echo('<div class="les'.$extra.'">');
 			if (count($info)) echo('<table><tr><td>'.implode('</td><td>/</td><td>', $info).'</td></tr></table>');
 			if ($comment) echo('<div class="comment">'.$comment.'</div>');
+			if ($enable_edit) {
+				$editid = $row[BASIS_ID];
+				if (!$editid) $editid = $row[BASIS_ID2];
+				echo('<span class="tiny"><a href="editles.php?file_id_basis='.$basis["file_id"].'&amp;file_id_wijz='.$wijz["file_id"].'&amp;zid='.$editid.'&amp;q='.urlencode($_GET['q']).$link_tail.'[edit]</a></span>');
+			}
 			echo('<div class="clear"></div></div>');
 
 			$row = $result->fetchRow();

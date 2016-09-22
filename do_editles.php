@@ -42,6 +42,11 @@ function checkget_docent($name) {
 	return checkget_entity_id($name, DOCENT);
 }
 
+function get_entity_ids($func, $list) {
+	if (count($list) == 1 && $list[0] == '') return array ();
+	return array_map($func, $list);
+}
+
 function get_les_id($dag0, $uur0, $lesgroepen0, $vakken0, $docenten0, $lokalen0, $notitie1) {
 	if ($dag0 < 1 && $dag0 > 5) $dag = 0;
 	else $dag = $dag0;
@@ -60,9 +65,10 @@ EOQ
 	if ($les_id) return $les_id;
 
 	// les niet gevonden, maak de les
-	$lokalen_ids = array_map('checkget_lokaal', $lokalen);
+	$lokalen_ids = get_entity_ids('checkget_lokaal', $lokalen);
 	$docenten_ids = array_map('checkget_docent', $docenten);
-	$lesgroepen_ids = array_map('checkget_lesgroep', $lesgroepen);
+	$lesgroepen_ids = get_entity_ids('checkget_lesgroep', $lesgroepen);
+	//$lesgroepen_ids = array_map('checkget_lesgroep', $lesgroepen);
 	$vakken_ids = array_map('checkget_vak', $vakken);
 	print_r($lokalen_ids);
 	print_r($docenten_ids);

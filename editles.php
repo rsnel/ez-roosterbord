@@ -95,6 +95,7 @@ if (is_array($row_wijz)) {
 <input type="hidden" name="c" value="<? echo(htmlenc($_GET['c'])); ?>">
 <input type="submit" name="submit" value="Opslaan">
 <input type="submit" name="submit" value="Onwijzig">
+<input type="submit" name="uitval" disabled value="Uitval">
 </form>
 </body>
 </html>

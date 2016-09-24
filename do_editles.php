@@ -147,7 +147,6 @@ case 'Opslaan':
 		if ($oldwijz_les_id) logwijz($oldwijz_les_id, $les_id, $zermelo_id_orig);
 		else logwijz($orig_les_id, $les_id, $zermelo_id_orig);
 
-		}
 	}
 	break;
 default:

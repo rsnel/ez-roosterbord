@@ -39,6 +39,7 @@ if (is_array($row_wijz)) {
 <form action="do_editles.php" accept-charset="UTF-8" method="POST">
 <table>
 <tr>
+<th></th>
 <th>dag</th>
 <th>uur</th>
 <th>lesgroepen</th>
@@ -48,6 +49,7 @@ if (is_array($row_wijz)) {
 <th>notitie</th>
 </tr>
 <tr>
+<td>basis</td>
 <td><? echo(print_dag($row_basis['dag'])); ?></td>
 <td><? echo($row_basis['uur']); ?></td>
 <td><? echo($row_basis['lesgroepen']); ?></td>
@@ -57,6 +59,7 @@ if (is_array($row_wijz)) {
 <td><? echo($row_basis['notitie']); ?></td>
 </tr>
 <tr>
+<td>wijz</td>
 <td><select name="dag">
 <option <? if ($dag == 1) { ?>selected <? } ?>value="1">ma</option>
 <option <? if ($dag == 2) { ?>selected <? } ?>value="2">di</option>

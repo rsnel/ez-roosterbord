@@ -1375,6 +1375,7 @@ $day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
 $thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
 $enable_edit = get_enable_edit($_GET['bw']);
 $lescounter = 0;
+$betrokkendolo = array();
 ?>
 <p><table id="rooster">
 <tr><th></th>
@@ -1505,6 +1506,20 @@ $lescounter = 0;
 			add($info, $row[DOCENTEN], ($row[WIJZ_ID] && $row[DOCENTEN2])?'<span class="unknown">DOC?</span>':'');
 			add($info, $row[LOKALEN], ($row[WIJZ_ID] && $row[LOKALEN2])?'<span class="unknown">LOK?</span>':'');
 
+			if ($row[LESGROEPEN] != '' || $row[LESGROEPEN2] != '') {
+				//echo("HIER");
+				if ($row[LOKALEN] != '') $betrlok = explode(',', $row[LOKALEN]);
+				else $betrlok = array ();
+				if ($row[LOKALEN2] != '') $betrlok2 = explode(',', $row[LOKALEN2]);
+				else $betrlok2 = array ();
+				if ($row[DOCENTEN] != '') $betrdoc = explode(',', $row[DOCENTEN]);
+				else $betrdoc = array ();
+				if ($row[DOCENTEN2] != '') $betrdoc2 = explode(',', $row[DOCENTEN2]);
+				else $betrdoc2 = array ();
+				foreach (array_merge($betrlok, $betrlok2, $betrdoc, $betrdoc2) as $ent) {
+					$betrokkendolo[$ent] = 1;
+				}
+			}
 			echo('<div class="les'.$extra.'">');
 			if (count($info)) echo('<table><tr><td>'.implode('</td><td>/</td><td>', $info).'</td></tr></table>');
 			if ($comment) echo('<div class="comment">'.$comment.'</div>');
@@ -1560,8 +1575,18 @@ Er is geen oud basisrooster<? } ?>
 <? if ($wijz['file_id']) { ?>, wijzigingen <? echo(print_rev($wijz['timestamp'], $wijz['wijz_id'])); } else { ?>, er zijn geen roosterwijzigingen ingelezen voor deze week<? } ?>
 <? } ?>.
 <? } ?>
+<? $docloc = array();
+if (isset($betrokkendolo)) {
+	foreach ($betrokkendolo as $key => $value) {
+		$docloc[] = $key;
+	}
+	$docloc = implode(',', $docloc);
+} else {
+	$docloc = '';
+}
+?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
-Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a><? } ?>
+Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="raw.php?q=<? echo($docloc) ?>&amp;file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[docloc]</a><? } ?> <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a>
 </span>
 
 <? html_end(); ?>

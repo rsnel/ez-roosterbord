@@ -95,9 +95,14 @@ case 'Onwijzig':
 	break;
 case 'Opslaan':
 	$les_id = get_les_id($_POST['dag'], $_POST['uur'], $_POST['lesgroepen'], $_POST['vakken'], $_POST['docenten'], $_POST['lokalen'], $_POST['notitie']);
-	mdb2_exec("INSERT INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( %i, %i, %i ) ON DUPLICATE KEY UPDATE les_id = %i", $_POST['file_id_wijz'], $_POST['zid'], $les_id, $les_id);
-	mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i AND les_id != %i", $_POST['file_id_wijz'], $_POST['zid'], $les_id);
-	break;
+	$org_les_id = mdb2_single_val("SELECT les_id FROM files2lessen WHERE zermelo_id = %i AND file_id = %i", $_POST['zid'], $_POST['file_id_basis']);
+	if ($org_les_id == $les_id) { // er is geen wijziging
+		mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i", $_POST['file_id_wijz'], $_POST['zid']);
+	} else {
+		mdb2_exec("INSERT INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( %i, %i, %i ) ON DUPLICATE KEY UPDATE les_id = %i", $_POST['file_id_wijz'], $_POST['zid'], $les_id, $les_id);
+		mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i AND les_id != %i", $_POST['file_id_wijz'], $_POST['zid'], $les_id);
+		break;
+	}
 default:
 }
 

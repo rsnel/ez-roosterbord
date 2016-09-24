@@ -121,13 +121,17 @@ function get_diff($les_oud, $les_nieuw) {
 	return implode('/', $nieuw).' <- '.implode('/', $oud);
 }
 
+function logwijz($old_les_id, $new_les_id, $zermelo_id_orig) {
+	$old_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $old_les_id);
+	$new_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $new_les_id);
+	logit($_SERVER['PHP_AUTH_USER'].' file_id_{basis='.$_POST['file_id_basis'].',wijz='.$_POST['file_id_wijz'].'} '.$zermelo_id_orig.' '.get_diff($old_les, $new_les));
+}
+
 switch ($_POST['submit']) {
 case 'Onwijzig':
 	$les_id = mdb2_single_val("SELECT les_id FROM files2lessen WHERE zermelo_id = %i AND file_id = %i", $_POST['zid'], $_POST['file_id_wijz']);
 	mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i", $_POST['file_id_wijz'], $_POST['zid']);
-	$orig_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $orig_les_id);
-	$les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $les_id);
-	if ($les_id) logit($_SERVER['PHP_AUTH_USER'].' '.$zermelo_id_orig.' '.get_diff($les, $orig_les));
+	if ($les_id) logwijz($les_id, $orig_les_id, $zermelo_id_orig);
 	break;
 case 'Opslaan':
 	$oldwijz_les_id =  mdb2_single_val("SELECT les_id FROM files2lessen WHERE zermelo_id = %i AND file_id = %i", $_POST['zid'], $_POST['file_id_wijz']);
@@ -135,21 +139,14 @@ case 'Opslaan':
 	if ($orig_les_id == $les_id) { // er is geen wijziging ten opzichte van basisrooster
 		if ($oldwijz_les_id) {
 			mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i", $_POST['file_id_wijz'], $_POST['zid']);
-			$oldwijz_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $oldwijz_les_id);
-			$orig_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $orig_les_id);
-			logit($_SERVER['PHP_AUTH_USER'].' '.$zermelo_id_orig.' '.get_diff($oldwijz_les, $orig_les));
+			logwijz($oldwijz_les_id, $orig_les_id, $zermelo_id_orig);
 		}
 	} else {
 		mdb2_exec("INSERT INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( %i, %i, %i ) ON DUPLICATE KEY UPDATE les_id = %i", $_POST['file_id_wijz'], $_POST['zid'], $les_id, $les_id);
 		mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i AND les_id != %i", $_POST['file_id_wijz'], $_POST['zid'], $les_id);
-		if ($oldwijz_les_id) {
-			$oldwijz_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $oldwijz_les_id);
-			$les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $les_id);
-			logit($_SERVER['PHP_AUTH_USER'].' '.$zermelo_id_orig.' '.get_diff($oldwijz_les, $les));
-		} else {
-			$orig_les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $orig_les_id);
-			$les = mdb2_single_assoc("SELECT * FROM lessen WHERE les_id = %i", $les_id);
-			logit($_SERVER['PHP_AUTH_USER'].' '.$zermelo_id_orig.' '.get_diff($orig_les, $les));
+		if ($oldwijz_les_id) logwijz($oldwijz_les_id, $les_id, $zermelo_id_orig);
+		else logwijz($orig_les_id, $les_id, $zermelo_id_orig);
+
 		}
 	}
 	break;

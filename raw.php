@@ -16,6 +16,8 @@ function checknq($entity) {
 	return (strtoupper($entity) != $_GET['nq']);
 }
 
+$dagen = array ( 'ma', 'di', 'wo', 'do', 'vr' );
+
 $entities = explode(',', $_GET['q']);
 sort($entities);
 if (isset($_GET['nq'])) {
@@ -23,7 +25,9 @@ if (isset($_GET['nq'])) {
 }
 $entities = array_unique($entities);
 $searchbox = implode(',', $entities);
-$tail = '&amp;file_id_basis='.$file_id_basis.'&amp;file_id_wijz='.$file_id_wijz.'">';
+$tail = '';
+for ($i = 1; $i <= 5; $i++) if (in_array($dagen[$i-1], $dispdagen)) $tail .= "&amp;dag[]={$dagen[$i-1]}";
+$tail .= '&amp;file_id_basis='.$file_id_basis.'&amp;file_id_wijz='.$file_id_wijz.'">';
 $head = '<a href="raw.php?q='.$searchbox;
 
 foreach ($entities as $entity) {
@@ -35,7 +39,6 @@ foreach ($entities as $entity) {
 }
 $select_doc = array();
 $select_lok = array();
-$dagen = array ( 'ma', 'di', 'wo', 'do', 'vr' );
 for ($i = 1; $i <= 5; $i++) {
 	if (!in_array($dagen[$i-1], $dispdagen)) continue;
 	for ($j = 1; $j <= 9; $j++) {

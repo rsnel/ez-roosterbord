@@ -9,6 +9,9 @@ else fatal_error("parameter file_id_basis is required");
 if (isset($_GET['file_id_wijz']) && $_GET['file_id_wijz']) $file_id_wijz = $_GET['file_id_wijz'];
 else $file_id_wijz = 0;
 
+if (isset($_GET['dag']) && is_array($_GET['dag'])) $dispdagen = $_GET['dag'];
+else $dispdagen = array ( 'ma', 'di', 'wo', 'do', 'vr');
+
 function checknq($entity) {
 	return (strtoupper($entity) != $_GET['nq']);
 }
@@ -34,6 +37,7 @@ $select_doc = array();
 $select_lok = array();
 $dagen = array ( 'ma', 'di', 'wo', 'do', 'vr' );
 for ($i = 1; $i <= 5; $i++) {
+	if (!in_array($dagen[$i-1], $dispdagen)) continue;
 	for ($j = 1; $j <= 9; $j++) {
 		$select_lok[] = "IFNULL(GROUP_CONCAT(IF(dag = $i AND uur = $j, IF(lokalen = '', '?', CONCAT('$head,', lokalen, '$tail', lokalen, '</a>')), NULL) SEPARATOR '<br>'), '-') {$dagen[$i-1]}$j";
 		$select_doc[] = "IFNULL(GROUP_CONCAT(IF(dag = $i AND uur = $j, IF(LENGTH(docenten) > 6, '****', CONCAT('$head,', docenten, '$tail', docenten, '</a>')), NULL) SEPARATOR '<br>'), '-') {$dagen[$i-1]}$j";
@@ -85,7 +89,12 @@ a:hover {
 </head>
 <body>
 <form action="raw.php" method="GET" accept-charset="UTF-8">
-docenten,lokalen<input size="100" type="text" name="q" value="<? echo($searchbox); ?>">
+docenten,lokalen<input size="60" type="text" name="q" value="<? echo($searchbox); ?>">
+<input type="checkbox" name="dag[]" <? if (in_array('ma', $dispdagen)) { ?>checked <? } ?>value="ma">ma
+<input type="checkbox" name="dag[]" <? if (in_array('di', $dispdagen)) { ?>checked <? } ?>value="di">di
+<input type="checkbox" name="dag[]" <? if (in_array('wo', $dispdagen)) { ?>checked <? } ?>value="wo">wo
+<input type="checkbox" name="dag[]" <? if (in_array('do', $dispdagen)) { ?>checked <? } ?>value="do">do
+<input type="checkbox" name="dag[]" <? if (in_array('vr', $dispdagen)) { ?>checked <? } ?>value="vr">vr
 <input type="hidden" name="file_id_basis" value="<? echo($file_id_basis); ?>">
 <input type="hidden" name="file_id_wijz" value="<? echo($file_id_wijz); ?>">
 <input type="submit" value="Zoek">

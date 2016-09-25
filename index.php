@@ -10,6 +10,160 @@ function icons() { ?>
 <link rel="shortcut icon" href="zermelo_zoom.ico">
 <?  }
 
+function getthismonday($safe_week) {
+	if ($safe_week < 30) {
+	        $year = substr(config('SCHOOLJAAR_LONG'), 5);
+	} else {
+        	$year = substr(config('SCHOOLJAAR_LONG'), 0, 4);
+	}
+	$day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
+	return $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
+}
+
+function json_finish($json) {
+	echo(json_encode($json));
+	exit;
+}
+
+function json_output() {
+        global $result, $safe_week, $default_week, $day_not_given;
+        global $link_tail_wowk, $prev_week, $next_week, $link_tail_tail;
+        global $entity_name, $entity_type, $entity_multiple, $basis, $wijz;
+        global $week_info;
+        global $berichten;
+	header("Content-Type: application/json; charset=UTF-8");
+	$json = array ();
+	if ($entity_type === '') {
+		if ($_GET['q'] == '') $json['error'] = "URL parameter 'q' mag niet leeg zijn";
+		else $json['error'] = "zoekterm '{$_GET['q']}' niet gevonden";
+		json_finish($json);
+	}
+	$json['school'] = config('SCHOOL_AFKORTING');
+	$json['q'] = $entity_name;
+	$thismonday = getthismonday($safe_week);
+
+	if ($berichten) $bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC);
+	if ($bericht) {
+		$berichten_out = array();
+		do {
+			$bericht_out = array (); 
+			$bericht_out['title'] = $bericht['bericht_title'].' ('.$bericht['bericht_entities'].')';
+			$bericht_out['body'] = $bericht['bericht_body'];
+			$berichten_out[] = $bericht_out;
+		} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
+		$json['berichten'] = $berichten_out;
+	}
+
+	$rooster = array();
+	$rooster['titel'] = print_dag($_GET['dy']).' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60);
+	$uren = array();
+ 	$row = $result->fetchRow();
+	for ($i = 1; $i < config('MAX_LESUUR') + 1; $i++) {
+		$lessen = array();
+		while ($row[UUR] == $i) {
+			$les = array();
+			cleanup_row($row);
+			$type = 'NORMAAL';
+			$comment = '';
+
+			// blokkeer html in NOTITIE(2) en transformeer bbcode
+			$row[NOTITIE] = bbtohtml_rlo(htmlenc($row[NOTITIE]));
+			$row[NOTITIE2] = bbtohtml_rlo(htmlenc($row[NOTITIE2]));
+			if ($row[WIJZ_ID]) { // deze les is: extra/nieuw, lokaalreservering, (fake)verplaatstvan of gewijzigd
+				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen oude les, dus: extra, reservering of fakeverplaatstvan
+					if ($row[VAKKEN] == 'lok') {
+						$row[VAKKEN] = '';
+						$type = 'LOKAALRESERVERING';
+						if ($row[NOTITIE]) $comment = $row[NOTITIE];
+					} else if (preg_match('/^van /', $row[NOTITIE])) {
+						$type = 'VERPLAATSTVAN';
+						$comment = $row[NOTITIE];
+					} else {
+						$type = 'EXTRA';
+						if ($_GET['bw'] == 'x') {
+							if ($row[NOTITIE] != '') $comment = $row[NOTITIE];
+						} else {
+							if ($row[NOTITIE] != '') $comment = $row[NOTITIE];
+						}
+					}
+				} else { // bij deze les hoort een oude les, dus gewijzigd of verplaatstvan
+					// staat de les op hetzelfde uur en is de oude les zichtbaar in dit rooster?
+					if ($row[UUR] == $row[UUR2] && $row[DAG] == $row[DAG2] && $row[VIS]) {
+						if ($row[LESGROEPEN] != $row[LESGROEPEN2] ||
+								$row[VAKKEN] != $row[VAKKEN2] ||
+								$row[DOCENTEN] != $row[DOCENTEN2] ||
+								$row[LOKALEN] != $row[LOKALEN2]) {
+							$type = 'GEWIJZIGD';
+							$comment = 'was '.simple_print_diff($row);
+							if ($row[NOTITIE] != '') $comment .= ', '.$row[NOTITIE];
+						}
+					} else {
+						$type = 'VERPLAATSTVAN';
+						$comment = 'van '.simple_print_diff($row);
+						if ($row[NOTITIE] != '') $comment .= ', '.$row[NOTITIE];
+					}
+				}
+			} else if ($row[BASIS_ID2] || ($_GET['bw'] == 'x') && $wijz['file_id']) { // dit is uitval,vrijstelling,(fake)verplaatstnaar,gewijzigd 
+				if (!$row[DAG2] || (!$row[VIS2] && $row[VIS])) { // bij deze les hoort geen nieuwe les, dus uitval/vrijstelling/fakeverplaatstnaar
+					// is deze les al aan de orde geweest bij een verplaatsing?
+					// zo ja, dan skippen we deze les
+					if (isset($dubbel[$row[BASIS_ID]])) {
+						$row = $result->fetchRow();
+						continue;
+					} else if ($_GET['bw'] == 'd') { // verberg vervallen lessen
+						$row = $result->fetchRow();
+						continue;
+					} else if (preg_match('/^naar /', $row[NOTITIE2])) {
+						$type = 'VERPLAATSTNAAR';
+						$comment = $row[NOTITIE2];
+					} else if (preg_match('/^vrij( (.*))?$/', $row[NOTITIE2], $matches)) {
+						$type = 'VRIJSTELLING';
+						if ($matches[2] != '') $comment = $matches[2];
+					} else {
+						$type = 'UITVAL';
+						if ($_GET['bw'] == 'x') {
+							if ($row[NOTITIE2] != '') $comment = $row[NOTITIE2];
+						} else {
+							if ($row[NOTITIE2] != '') $comment = $row[NOTITIE2];
+						}
+					}
+				} else { // bij deze les hoort een nieuwe les dus gewijzigd of verplaatstnaar
+					$dubbel[$row[BASIS_ID]] = 1;
+					// staat de nieuwe les op dezelfde plek en is deze zichtbaar in dit rooster?
+					if ($row[DAG] == $row[DAG2] && $row[UUR] == $row[UUR2] && $row[VIS]) {
+						$row = $result->fetchRow();
+						continue;
+					} else if ($_GET['bw'] == 'd') { // verberg verplaatste lessen
+						$row = $result->fetchRow();
+						continue;
+					} else {
+						$type = 'VERPLAATSTNAAR';
+						$comment = 'naar '.simple_print_diff($row);
+						if ($row[NOTITIE2] != '') $comment .= ', '.$row[NOTITIE2];
+					}
+				}
+			} else if (!$week_info[$_GET['dy']] && $_GET['bw'] != 'b' && $_GET['bw'] != 'x') { // deze dag valt uit
+				$type = 'VRIJSTELLING';
+			} else { // dit is een gewone les
+				if ($row[NOTITIE]) $comment = $row[NOTITIE];
+			}
+
+			$les['lesgroepen'] = $row[LESGROEPEN];
+			$les['vakken'] = $row[LESGROEPEN];
+			$les['docenten'] = $row[DOCENTEN];
+			$les['lokalen'] = $row[LOKALEN];
+			$les['status'] = $type;
+			$les['toelichting'] = $comment;
+			$lessen[] = $les;
+			$row = $result->fetchRow();
+		}
+		$uren['u'.$i] = $lessen;
+	}
+	$rooster['uren'] = $uren;
+	$json['rooster'] = $rooster;
+	json_finish($json);
+}
+	
 function mobile_html() {
 	global $result, $safe_week, $default_week, $day_not_given;
 	global $link_tail_wowk, $prev_week, $next_week, $link_tail_tail;
@@ -97,29 +251,13 @@ $('body').off('swipeleft').on('swipeleft', next);
 		?> ui-state-disabled<?
 	} ?>" href="<? echo(htmlenc($next)) ?>"></a><?
 
-if ($safe_week < 30) {
-	        $year = substr(config('SCHOOLJAAR_LONG'), 5);
-		} else {
-        $year = substr(config('SCHOOLJAAR_LONG'), 0, 4);
-}
-$day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
-$thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
+$thismonday = getthismonday($safe_week);
+
 ?>
 </div>
 <h1><?
 echo(config('SCHOOL_AFKORTING').' ');
-switch ($_GET['dy']) {
-	case 1: echo('ma');
-		break; 
-	case 2: echo('di');
-		break; 
-	case 3: echo('wo');
-		break; 
-	case 4: echo('do');
-		break; 
-	case 5: echo('vr');
-		break; 
-}
+echo(print_dag($_GET['dy']));
 echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 ?>
 </h1>
@@ -156,6 +294,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 ?><li><div class="ui-grid-a"><div style="width: 5%" class="ui-block-a"><? echo($i); ?></div>
 <div style="width: 95%" class="ui-block-b">
 <?
+
 		while ($row[UUR] == $i) {
 			cleanup_row($row);
 			$extra = ''; $comment = '';
@@ -273,6 +412,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 		}
 			echo('</div>');
 		?></div></li><?
+
 	}
 } else {
 
@@ -419,7 +559,7 @@ echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.
 <option <? if ($_GET['dy'] == 3) echo('selected '); ?>value="3">wo</option>
 <option <? if ($_GET['dy'] == 4) echo('selected '); ?>value="4">do</option>
 <option <? if ($_GET['dy'] == 5) echo('selected '); ?>value="5">vr</option>
-</select>--><input type="hidden" name="dy" value="<? echo($_GET['dy']); ?>"><? 
+</select>--><input type="hidden" name="dy" value="<? echo($_GET['dy']); ?>"><?
 if ($_GET['dy'] == '*')
 echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.$next_week.$link_tail_tail.'">&gt;</a>':'<del>&gt;</del>');
 else if ($_GET['dy'] == 5)
@@ -507,10 +647,10 @@ $default_day = get_default_day($default_week);
 
 $day_not_given = 0;
 
-if (!isset($_GET['m'])) $_GET['dy'] = '*';
+//if (!isset($_GET['m'])) $_GET['dy'] = '*';
 
 if (!isset($_GET['dy']) || $_GET['dy'] == '*') {
-	if (!isset($_GET['m'])) $_GET['dy'] = '*';
+	if (!isset($_GET['m']) && !isset($_GET['json'])) $_GET['dy'] = '*';
 	else $_GET['dy'] = $default_day;
 }
 else if ($_GET['dy'] == 1 || $_GET['dy'] == 2 || $_GET['dy'] == 3 || $_GET['dy'] == 4 || $_GET['dy'] == 5) {
@@ -1175,6 +1315,26 @@ function vakmatch($vak, $match) {
 
 }
 
+function simple_print_diff($row) {
+	if ($row[DAG] != $row[DAG2] || $row[UUR] != $row[UUR2]) {
+		if ($row[DAG] != $row[DAG2] && $_GET['dy'] != '*') $output[] = print_dag($row[DAG2]);
+		else $output[] = print_dag($row[DAG2]).$row[UUR2];
+	}
+	if ($row[LESGROEPEN] != $row[LESGROEPEN2] && $row[LESGROEPEN2] != '') $output[] = $row[LESGROEPEN2];
+	if ($row[VAKKEN] != $row[VAKKEN2] && $row[VAKKEN2] != '') {
+		if ($row[VAKKEN2] != '' && !vakmatch($row[VAKKEN2], $row[LESGROEPEN2])) $output[] = $row[VAKKEN2];
+	}
+	if ($row[DOCENTEN] != $row[DOCENTEN2]) {
+		if ($row[DOCENTEN2] != '') $output[] = $row[DOCENTEN2];
+		else $output[] = 'DOC?';
+	}	
+	if ($row[LOKALEN] != $row[LOKALEN2]) {
+       		if ($row[LOKALEN2] != '') $output[] = $row[LOKALEN2];
+		else $output[] = 'LOK?';
+	}
+	return implode('/', $output);
+}
+
 function print_diff($row) {
 	if ($row[DAG] != $row[DAG2] || $row[UUR] != $row[UUR2]) {
 		if ($row[DAG] != $row[DAG2] && $_GET['dy'] != '*') $output[] = make_link($_GET['q'], print_dag($row[DAG2]), $row[DAG2]).$row[UUR2];
@@ -1302,6 +1462,11 @@ if (isset($_GET['m'])) {
 	exit;
 }
 
+if (isset($_GET['json'])) {
+	json_output();
+	exit;
+}
+
 html_start($entity_type !== ''); ?><div class="clear" style="padding-top: 1px;">
 <?
 if ($entity_type === '') { 
@@ -1366,13 +1531,7 @@ if (isset($_GET['debug'])) {
 }
 $row = $result->fetchRow();
 
-if ($safe_week < 30) {
-	        $year = substr(config('SCHOOLJAAR_LONG'), 5);
-		} else {
-        $year = substr(config('SCHOOLJAAR_LONG'), 0, 4);
-}
-$day_in_week = strtotime(sprintf("$year-01-04 + %d weeks", $safe_week - 1));
-$thismonday = $day_in_week - ((date('w', $day_in_week) + 6)%7)*24*60*60;
+$thismonday = getthismonday($safe_week);
 $enable_edit = get_enable_edit($_GET['bw']);
 $lescounter = 0;
 $betrokkendolo = array();
@@ -1575,18 +1734,18 @@ Er is geen oud basisrooster<? } ?>
 <? if ($wijz['file_id']) { ?>, wijzigingen <? echo(print_rev($wijz['timestamp'], $wijz['wijz_id'])); } else { ?>, er zijn geen roosterwijzigingen ingelezen voor deze week<? } ?>
 <? } ?>.
 <? } ?>
-<? $docloc = array();
+<? $doclok = array();
 if (isset($betrokkendolo)) {
 	foreach ($betrokkendolo as $key => $value) {
-		$docloc[] = $key;
+		$doclok[] = $key;
 	}
-	$docloc = implode(',', $docloc);
+	$doclok = implode(',', $doclok);
 } else {
-	$docloc = '';
+	$doclok = '';
 }
 ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
-Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="raw.php?q=<? echo($docloc) ?>&amp;file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[docloc]</a><? } ?> <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a>
+Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="raw.php?<? if ($_GET['dy'] != '*') { ?> dag[]=<? echo(print_dag($_GET['dy'])); ?>&amp;<? } ?>q=<? echo($doclok) ?>&amp;file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[doclok]</a><? } ?> <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a>
 </span>
 
 <? html_end(); ?>

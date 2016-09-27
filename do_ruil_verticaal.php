@@ -210,6 +210,6 @@ foreach ($_POST['lesuur'] as $lesuur) {
 $dagparm = array_reduce($_POST['dag'],
        		function ($carry, $item) { return $carry.'dag[]='.$item.'&'; }, '');
 
-header('Location: '.dirname($_SERVER['PHP_SELF']).'/raw.php?q='.urlencode($_POST['q']).'&file_id_basis='.urlencode($file_id_basis).'&'.$dagparm.'file_id_wijz='.urlencode($file_id_wijz));
+header('Location: '.dirname($_SERVER['PHP_SELF']).'/doclok.php?q='.urlencode($_POST['q']).'&file_id_basis='.urlencode($file_id_basis).'&'.$dagparm.'file_id_wijz='.urlencode($file_id_wijz));
 
 ?>

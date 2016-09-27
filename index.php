@@ -1745,7 +1745,7 @@ if (isset($betrokkendolo)) {
 }
 ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
-Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="raw.php?<? if ($_GET['dy'] != '*') { ?> dag[]=<? echo(print_dag($_GET['dy'])); ?>&amp;<? } ?>q=<? echo($doclok) ?>&amp;file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[doclok]</a><? } ?> <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a>
+Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="doclok.php?<? if ($_GET['dy'] != '*') { ?> dag[]=<? echo(print_dag($_GET['dy'])); ?>&amp;<? } ?>q=<? echo($doclok) ?>&amp;file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[doclok]</a><? } ?> <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a>
 </span>
 
 <? html_end(); ?>

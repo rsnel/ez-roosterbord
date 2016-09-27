@@ -42,7 +42,7 @@ $searchbox = implode(',', $entities);
 $tail = '';
 for ($i = 1; $i <= 5; $i++) if (in_array($dagen[$i-1], $dispdagen)) $tail .= "&amp;dag[]={$dagen[$i-1]}";
 $tail .= '&amp;file_id_basis='.$file_id_basis.'&amp;file_id_wijz='.$file_id_wijz.'">';
-$head = '<a href="raw.php?q='.$searchbox;
+$head = '<a href="doclok.php?q='.$searchbox;
 
 foreach ($entities as $entity) {
 	$row = mdb2_single_array("SELECT entity_id, entity_type, entity_name FROM entities WHERE entity_name = '%q' AND 
@@ -64,7 +64,7 @@ for ($i = 1; $i <= 5; $i++) {
 	if (!in_array($dagen[$i-1], $dispdagen)) continue;
 	for ($j = 1; $j <= 9; $j++) {
 		$uur = "$i-$j";
-		if ($enable_edit) $colname = "`<input type=\"checkbox\" name=\"lesuur[]\" value=\"$i-$j\">{$dagen[$i-1]}$j`";
+		if ($enable_edit) $colname = "`<input type=\"checkbox\" name=\"lesuur[]\" value=\"$i-$j\"><br>{$dagen[$i-1]}$j`";
 		else $colname = "{$dagen[$i-1]}$j";
 		$select_lok[] = "IFNULL(GROUP_CONCAT(IF(dag = $i AND uur = $j, IF(lokalen = '', '?', IF(LENGTH(lokalen) > 6, '****', IF(lokalen IN ( $escaped_entities), lokalen, CONCAT('$head,', lokalen, '$tail', lokalen, '</a>')))), NULL) SEPARATOR '<br>'), '-') $colname";
 		$select_doc[] = <<<EOQ
@@ -177,7 +177,7 @@ a:hover {
 </style>
 </head>
 <body>
-<form action="raw.php" method="GET" accept-charset="UTF-8">
+<form action="doclok.php" method="GET" accept-charset="UTF-8">
 docenten,lokalen<input size="60" type="text" name="q" value="<? echo($searchbox); ?>">
 <input type="checkbox" name="dag[]" <? if (in_array('ma', $dispdagen)) { ?>checked <? } ?>value="ma">ma
 <input type="checkbox" name="dag[]" <? if (in_array('di', $dispdagen)) { ?>checked <? } ?>value="di">di

@@ -12,8 +12,8 @@ if (!$file_basis) fatal_error("invalid file_id_basis");
 if (isset($_GET['file_id_wijz']) && $_GET['file_id_wijz']) $file_id_wijz = $_GET['file_id_wijz'];
 else $file_id_wijz = 0;
 
-$file_wijz = mdb2_single_assoc("SELECT * FROM files WHERE file_id = %i", $file_id_basis);
-if (!$file_wijz) fatal_error("invalid file_id_basis");
+$file_wijz = mdb2_single_assoc("SELECT * FROM files WHERE file_id = %i", $file_id_wijz);
+if (!$file_wijz) fatal_error("invalid file_id_wijz");
 
 if (isset($_GET['dag']) && is_array($_GET['dag'])) $dispdagen = $_GET['dag'];
 else $dispdagen = array ( 'ma', 'di', 'wo', 'do', 'vr');

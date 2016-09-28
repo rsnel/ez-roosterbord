@@ -2,8 +2,17 @@
 require_once('rquery.php');
 
 
-if (!isset($_GET['file_id_basis'])) fatal_error("file_id_basis not given");
-$file_id_basis = $_GET['file_id_basis'];
+if (isset($_GET['file_id_basis']) && $_GET['file_id_basis']) $file_id_basis = $_GET['file_id_basis'];
+else fatal_error("parameter file_id_basis is required");
+
+$file_basis = mdb2_single_assoc("SELECT * FROM files WHERE file_id = %i", $file_id_basis);
+if (!$file_basis) fatal_error("invalid file_id_basis");
+
+if (isset($_GET['file_id_wijz']) && $_GET['file_id_wijz']) $file_id_wijz = $_GET['file_id_wijz'];
+else $file_id_wijz = 0;
+
+$file_wijz = mdb2_single_assoc("SELECT * FROM files WHERE file_id = %i", $file_id_wijz);
+if (!$file_wijz) fatal_error("invalid file_id_wijz");
 
 
 $subquery = rquery(NULL, NULL, $file_id_basis, isset($_GET['file_id_wijz'])?$_GET['file_id_wijz']:0, 'LEFT ');

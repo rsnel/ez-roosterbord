@@ -95,6 +95,9 @@ foreach ($entity_ids as $entity_id) {
 	if ($entity_id[1] == LOKAAL && $enable_edit) {
 		$select = $select_doc;
 		$dolo = "'<input type=\"checkbox\" name=\"lokaal[]\" value=\"{$entity_id[2]}\"> $head&amp;nq={$entity_id[2]}$tail{$entity_id[2]}</a>' dolo";
+	} else if ($entity_id[1] == LOKAAL) {
+		$select = $select_doc;
+		$dolo = "'$head&amp;nq={$entity_id[2]}$tail{$entity_id[2]}</a>' dolo";
 	} else {
 		$select = $select_lok;
 		$dolo = "'$head&amp;nq={$entity_id[2]}$tail{$entity_id[2]}</a>' dolo";

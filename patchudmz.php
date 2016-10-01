@@ -62,7 +62,7 @@ while (!feof($fpin)) {
 			break;
 		case 'LESLEGENDA':
 			$legenda = explode("\t", $line);
-			if (($indices['lesgroepen'] = array_search('Grp', $legenda)) === false) fatal_error('column Grp not found');
+			if (($indices['groepen'] = array_search('Grp', $legenda)) === false) fatal_error('column Grp not found');
 			if (($indices['vakken'] = array_search('Vak', $legenda)) === false) fatal_error('column Vak not found');
 			if (($indices['docenten'] = array_search('Doc', $legenda)) === false) fatal_error('column Doc not found');
 			if (($indices['lokalen'] = array_search('Lok', $legenda)) === false) fatal_error('column Lok not found');

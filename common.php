@@ -62,7 +62,8 @@ $config_info = array(
 	'SHOW_TEACHERNAMES' => '0',
 	'MAX_LESUUR' => 9,
 	'ENABLE_EDIT_WIJZ' => 'false',
-	'GEMACHTIGD_EDIT_WIJZ' => 'roostermakers'
+	'GEMACHTIGD_EDIT_WIJZ' => 'roostermakers',
+	'HALFSLACHTIGE_TIJDVAKKEN' => 'false'
 );
 
 // get config from database and set all unconfigured items to default values

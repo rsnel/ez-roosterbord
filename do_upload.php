@@ -31,16 +31,16 @@ function add_entity($name, $type) {
 	global $entities;
 	if ($name == '') return;
 
-	if (isset($entities[$name])) {
-		$oldtype = $entities[$name][1];
-		if ($oldtype == $type || ($oldtype == STAMKLAS && $type == LESGROEP) || ($oldtype == LESGROEP && $type == STAMKLAS)) return $entities[$name][0];
+	if (isset($entities[strtoupper($name)])) {
+		$oldtype = $entities[strtoupper($name)][1];
+		if ($oldtype == $type || ($oldtype == STAMKLAS && $type == LESGROEP) || ($oldtype == LESGROEP && $type == STAMKLAS)) return $entities[strtoupper($name)][0];
 		else fatal_error('basisrooster has two entities of same name "'.$name.'", lokalen, docenten, leerlingen (nummers), '.
-			'lesgroepen (ook stamklassen) mogen niet dezelfde naam hebben');
+			'lesgroepen (ook stamklassen en categorieen) mogen niet dezelfde naam hebben');
 	} 
 	mdb2_exec("INSERT INTO entities ( entity_name, entity_type, entity_active ) VALUES ( '%q', %i, 1 )", $name, $type);
 	$entity_id = mdb2_last_insert_id();
 
-	$entities[$name] = array( $entity_id, $type );
+	$entities[strtoupper($name)] = array( $entity_id, $type );
 	return $entity_id;
 }
 
@@ -648,7 +648,7 @@ register_shutdown_function('shutdown_function');
 if (!lock_acquire('{ "state": 1, "perc": 0 }', $_POST['randid'])) fatal_error('er is al een update bezig, even geduld AUB');
 
 // cache contents of table entities
-$entities = mdb2_all_ordered_rekey('SELECT entity_name, entity_id, entity_type FROM entities');
+$entities = mdb2_all_ordered_rekey('SELECT UPPER(entity_name), entity_id, entity_type FROM entities');
 
 // cache een lijst leerlingen van wie we de naam al weten
 $names = mdb2_all_ordered_rekey('SELECT entity_id, name FROM names');

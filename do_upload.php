@@ -34,8 +34,14 @@ function add_entity($name, $type) {
 	if (isset($entities[strtoupper($name)])) {
 		$oldtype = $entities[strtoupper($name)][1];
 		if ($oldtype == $type || ($oldtype == STAMKLAS && $type == LESGROEP) || ($oldtype == LESGROEP && $type == STAMKLAS)) return $entities[strtoupper($name)][0];
-		else fatal_error('basisrooster has two entities of same name "'.$name.'", lokalen, docenten, leerlingen (nummers), '.
-			'lesgroepen (ook stamklassen en categorieen) mogen niet dezelfde naam hebben');
+		else {
+			$oldtype_name = show_type($oldtype);
+			$type_name = show_type($type);
+			// this corrects the case of the old name
+			$old_name = mdb2_single_val("SELECT entity_name FROM entities WHERE entity_name = '%q'", $name);
+			fatal_error('basisrooster has two entities of same name "'.$name.'", lokalen, docenten, leerlingen (nummers), '.
+			'lesgroepen (ook stamklassen en categorieen) mogen niet dezelfde naam hebben, bestaande entity '.$old_name.' ('.$oldtype_name.'), toegevoegde entity '.$name.' ('.$type_name.')');
+		}
 	} 
 	mdb2_exec("INSERT INTO entities ( entity_name, entity_type, entity_active ) VALUES ( '%q', %i, 1 )", $name, $type);
 	$entity_id = mdb2_last_insert_id();

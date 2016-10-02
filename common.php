@@ -47,6 +47,25 @@ define('STAMKLAS', 5);
 define('VAK', 6);
 define('CATEGORIE',7);
 
+function show_type($type) {
+	switch ($type) {
+	case LEERLING:
+		return 'LEERLING';
+	case DOCENT:
+		return 'DOCENT';
+	case LOKAAL:
+		return 'LOKAAL';
+	case LESGROEP:
+		return 'LESGROEP';
+	case STAMKLAS:
+		return 'STAMKLAS';
+	case VAK:
+		return 'VAK';
+	case CATEGORIE:
+		return 'CATEGORIE';
+	}
+}
+
 $config_info = array(
 	'ENABLE_TEST_WARNING' => '0',
 	'HIDE_STUDENTS' => '0',

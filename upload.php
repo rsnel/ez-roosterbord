@@ -135,6 +135,7 @@ zijn, maximale grootte <? echo $upload_mb ?>MB.<br>
 <input type="hidden" name="type" value="basis">
 <select name="week_id"><? echo($week_options); ?></select><br>
 Er staat al een basisrooster in de gegeven week en ik wil het overschrijven <input name="overwrite" value="true" type="checkbox"><br>
+<? if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'true') { ?>tijdvak: <input type="text" name="tijdvak"><br><? } ?>
 <input type="hidden" name="secret" value="<? echo(config('UPLOAD_SECRET')); ?>">
 <input type="hidden" class="randid" name="randid">
 <input id="submitbutton" type="submit" value="Upload">

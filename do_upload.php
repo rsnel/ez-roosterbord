@@ -302,8 +302,16 @@ function import_basisrooster($file_id, $tmp_name) {
 	mdb2_exec("DELETE FROM grp2grp WHERE file_id_basis = $file_id");
 
 	if (count($udmz['Tijdpatroon']['Tijdvak']) > 1) {
-		logit('geuploade udmz bevat meer dan 1 tijdvak, ez-roosterbord kan daar (nog) niks mee');
-		return;
+		if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'false') {
+			logit('geuploade udmz bevat meer dan 1 tijdvak, ez-roosterbord kan daar (nog) niks mee');
+			return;
+		} else if (!isset($_POST['tijdvak']) || $_POST['tijdvak'] == '') {
+			logit('geen tijdvak gegeven bij upload');
+			return;
+		} else if (!isset($udmz['Tijdpatroon']['Tijdvak'][$_POST['tijdvak']])) {
+			logit("tijdvak met naam '{$_POST['tijdvak']} niet gevonden in udmz");
+			return;
+		}
 	}
 
 	// eerst lopen we alle leerlingen langs
@@ -433,7 +441,10 @@ EOT
 
 	foreach ($udmz['Les'] as $id => $row) {
 		incdone($done, $total, 2);
-		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok'))) return;
+		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok', 'Tdv'))) return;
+
+		// negeer lessen uit een ander tijdvak
+		if (config('HALFSLACHTIGE_TIJDVAKKEN') && $row['Tdv'] != $_POST['tijdvak']) continue;
 
 		if (!($zermelo_id = add_zermelo_id($id))) return;
 		insert_les(',', $zermelo_id, $row['Dag'], $row['Uur'], $row['Vak'], $row['Grp'], $row['Doc'], $row['Lok'], $file_id, $row['#WijzigComment']);
@@ -637,7 +648,7 @@ register_shutdown_function('shutdown_function');
 if (!lock_acquire('{ "state": 1, "perc": 0 }', $_POST['randid'])) fatal_error('er is al een update bezig, even geduld AUB');
 
 // cache contents of table entities
-$entities = mdb2_all_ordered_rekey('SELECT  entity_name, entity_id, entity_type FROM entities');
+$entities = mdb2_all_ordered_rekey('SELECT entity_name, entity_id, entity_type FROM entities');
 
 // cache een lijst leerlingen van wie we de naam al weten
 $names = mdb2_all_ordered_rekey('SELECT entity_id, name FROM names');
@@ -677,7 +688,7 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 		$new_filename = move_upload('wijz', $md5, $week);
 		import_wijzigingen($file_id, $week, $new_filename, $basis_file_id);
 		$status = mdb2_single_val("SELECT file_status FROM files WHERE file_id = $basis_file_id");
-		if (!$status) fatal_error('de import is fout gegaan, we kunnen deze wijzigingen niet publiceren :(, mail snelr@ovc.nl');
+		if (!$status) fatal_error('de import is fout gegaan, we kunnen deze wijzigingen niet publiceren :(, mail r.snel@ovc.nl');
 
 		//logit('import succesvol, nu nog koppelen aan weken');
 	} else {
@@ -713,7 +724,7 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 		$new_filename = move_upload('basis', $md5, $week);
 		import_basisrooster($file_id, $new_filename);
 		$status = mdb2_single_val("SELECT file_status FROM files WHERE file_id = $file_id");
-		if (!$status) fatal_error('de import is fout gegaan, we kunnen dit rooster niet publiceren :(, mail snelr@ovc.nl');
+		if (!$status) fatal_error('de import is fout gegaan, we kunnen dit rooster niet publiceren :(, mail r.snel@ovc.nl');
 		//logit('import succesvol, nu nog koppelen aan weken');
 	} else {
 		//logit('file was al succesvol geimporteerd');

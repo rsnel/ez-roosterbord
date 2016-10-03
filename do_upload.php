@@ -367,7 +367,8 @@ function import_basisrooster($file_id, $tmp_name) {
 		if (in_array($category, config('ZERMELO_CATEGORY_IGNORE'))) continue;
 		incdone($done, $total, 2);
 
-		if (!($category_id = add_entity($category, CATEGORIE))) return;
+		if (config('DISABLE_INLEZEN_CATEGORIEEN') != 'true')
+			if (!($category_id = add_entity($category, CATEGORIE))) return;
 
 		foreach ($list as $id => $row) {
 			incdone($done, $total, 2);
@@ -384,7 +385,8 @@ function import_basisrooster($file_id, $tmp_name) {
 			$stamz[$row['BASICCLASS']] = $category;
 
 			add_basis_grp2ppl($lesgroep_id, $leerling_id, $file_id);
-			add_basis_grp2ppl($category_id, $leerling_id, $file_id);
+			if (config('DISABLE_INLEZEN_CATEGORIEEN') != 'true')
+				add_basis_grp2ppl($category_id, $leerling_id, $file_id);
 		}
 	}
 
@@ -408,7 +410,8 @@ function import_basisrooster($file_id, $tmp_name) {
 		if (in_array($category, config('ZERMELO_CATEGORY_IGNORE'))) continue;
 		incdone($done, $total, 2);
 
-		if (!($category_id = add_entity($category, CATEGORIE))) return;
+		if (config('DISABLE_INLEZEN_CATEGORIEEN') != 'true')
+			if (!($category_id = add_entity($category, CATEGORIE))) return;
 
 		foreach ($list as $id => $row) {
 			if (in_array($id, config('ZERMELO_GROUP_IGNORE'))) continue;

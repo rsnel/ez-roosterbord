@@ -47,6 +47,12 @@ function get_entity_ids($func, $list) {
 	return array_map($func, $list);
 }
 
+// l02 is gelijk aan L02, maar we willen echt L02 hebben staan, om dit automatisch
+// goed te krijgen halen we, op basis van de entity_id, de juiste naam uit de database
+function canonical_form($entity_id) {
+	return mdb2_single_val("SELECT entity_name FROM entities WHERE entity_id = %i", $entity_id);
+}
+
 function get_les_id($dag0, $uur0, $lesgroepen0, $vakken0, $docenten0, $lokalen0, $notitie1) {
 	if ($dag0 < 1 && $dag0 > 5) $dag = 0;
 	else $dag = $dag0;
@@ -66,9 +72,12 @@ EOQ
 
 	// les niet gevonden, maak de les
 	$lokalen_ids = get_entity_ids('checkget_lokaal', $lokalen);
+	$lokalen1 = implode(',', array_map('canonical_form', $lokalen_ids));
 	$docenten_ids = array_map('checkget_docent', $docenten);
-	$lesgroepen_ids = get_entity_ids('checkget_lesgroep', $lesgroepen);
+	$docenten1 = implode(',', array_map('canonical_form', $docenten_ids));
 	//$lesgroepen_ids = array_map('checkget_lesgroep', $lesgroepen);
+	$lesgroepen_ids = get_entity_ids('checkget_lesgroep', $lesgroepen);
+	$lesgroepen1 = implode(',', array_map('canonical_form', $lesgroepen_ids));
 	$vakken_ids = array_map('checkget_vak', $vakken);
 	print_r($lokalen_ids);
 	print_r($docenten_ids);

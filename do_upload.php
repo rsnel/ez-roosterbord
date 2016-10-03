@@ -453,7 +453,7 @@ EOT
 		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok', 'Tdv'))) return;
 
 		// negeer lessen uit een ander tijdvak
-		if (config('HALFSLACHTIGE_TIJDVAKKEN') && $row['Tdv'] != $_POST['tijdvak']) continue;
+		if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'true' && $row['Tdv'] != $_POST['tijdvak']) continue;
 
 		if (!($zermelo_id = add_zermelo_id($id))) return;
 		insert_les(',', $zermelo_id, $row['Dag'], $row['Uur'], $row['Vak'], $row['Grp'], $row['Doc'], $row['Lok'], $file_id, $row['#WijzigComment']);

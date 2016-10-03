@@ -85,7 +85,7 @@ while (!feof($fpin)) {
 						echo("$key => {$split[$index]}\n");
 					}*/
 					//print_r($wijzigingen[$split[0]]);
-					$split[$indices['groepen']] = $wijzigingen[$split[0]]['groepen'];
+					$split[$indices['groepen']] = $wijzigingen[$split[0]]['lesgroepen'];
 					$split[$indices['vakken']] = $wijzigingen[$split[0]]['vakken'];
 					$split[$indices['docenten']] = $wijzigingen[$split[0]]['docenten'];
 					$split[$indices['lokalen']] = $wijzigingen[$split[0]]['lokalen'];

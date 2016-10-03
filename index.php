@@ -1482,8 +1482,10 @@ if ($entity_type === '') {
 	}
 	echo('<p>Vakken:');
 	while ($row = $res_vak->fetchRow()) echo(' '.make_link($row[0], htmlenc(substr($row[0], 1))));
-	echo('<p>Categorie&euml;n:');
-	while ($row = $res_cat->fetchRow()) echo(' '.make_link($row[0]));
+	if (config('DISABLE_INLEZEN_CATEGORIEEN') != 'true') {
+		echo('<p>Categorie&euml;n:');
+		while ($row = $res_cat->fetchRow()) echo(' '.make_link($row[0]));
+	}
 	echo('<p>'."\n");
 } else {
 

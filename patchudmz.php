@@ -18,6 +18,7 @@ EOQ
 <title>UDMZ patchpagina</title>
 </head>
 <body>
+<h1>WAARSCHUWING: de output is nog niet goed; stamklassen worden altijd weergeveven zonder categorie en Zermelo die kan daar niet altijd mee omgaan</h1>
 <h3>Alle roosteruploads</h3>
 <? mdb2_res_table($res_geupload); ?>
 </body>

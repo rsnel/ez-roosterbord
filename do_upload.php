@@ -450,10 +450,16 @@ EOT
 
 	foreach ($udmz['Les'] as $id => $row) {
 		incdone($done, $total, 2);
-		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok', 'Tdv'))) return;
+		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok', 'Tdv', 'IGNORED'))) return;
 
 		// negeer lessen uit een ander tijdvak
 		if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'true' && $row['Tdv'] != $_POST['tijdvak']) continue;
+
+		// negeer lessen die in het basisrooster op 'UITVAL' staan
+		if (preg_match('/\<UITVAL\>/', $row['IGNORED'])) {
+			logit('LES '.$id.' staat op \'uitval\' in basisrooster?!?!?');
+			continue;
+		}
 
 		if (!($zermelo_id = add_zermelo_id($id))) return;
 		insert_les(',', $zermelo_id, $row['Dag'], $row['Uur'], $row['Vak'], $row['Grp'], $row['Doc'], $row['Lok'], $file_id, $row['#WijzigComment']);

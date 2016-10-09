@@ -83,7 +83,8 @@ $config_info = array(
 	'ENABLE_EDIT_WIJZ' => 'false',
 	'GEMACHTIGD_EDIT_WIJZ' => 'roostermakers',
 	'HALFSLACHTIGE_TIJDVAKKEN' => 'false',
-	'DISABLE_INLEZEN_CATEGORIEEN' => 'false'
+	'DISABLE_INLEZEN_CATEGORIEEN' => 'false',
+	'LESUUR_FORMAT' => 'standaard'
 );
 
 // get config from database and set all unconfigured items to default values

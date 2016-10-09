@@ -75,7 +75,7 @@ function add_entities2lessen($entity_id, $les_id) {
 // roosterwijzigingen_wk??.txt format te lezen, in het nieuwe format
 // wordt er gewerkt met lesuren in plaats van tijden (het enige voordeel...)
 function get_uur($uur) {
-        switch ($uur) {
+        /*switch ($uur) {
 	        case '08:30': return 1;
        		case '09:20': return 2;
         	case '10:10': return 3;
@@ -86,12 +86,39 @@ function get_uur($uur) {
         	case '15:10': return 8;
         	case '16:00': return 9;
         	default: fatal_error('onbekend lesuur '.$uur);
-        }
+}*/
+	/* Heemlanden gebruikt Zermelo 2, overige gebruikers waar ik van weet
+	 * zijn op Zermelo 3, alleen Heemlanden gebruikt deze functie op dit moment */
+	switch ($uur) {
+		case '08:20': return 1;
+		case '08:30': return 1;
+		case '09:40': return 2;
+		case '09:45': return 2;
+		case '10:55': return 3;
+		case '11:10': return 3;
+		case '11:20': return 3;
+		case '12:20': return 4;
+		case '12:30': return 4;
+		case '12:35': return 4;
+		case '13:45': return 5;
+		case '13:50': return 5;
+		case '14:00': return 5;
+		case '15:00': return 6;
+		case '15:10': return 6;
+		case '15:15': return 6;
+		case '15:45': return 7;
+		case '16:25': return 7;
+		default: fatal_error('onbekend lesuur '.$uur);
+	}
 }
 
 function get_uur_udmz($uur) {
-	if (preg_match('/u(\d+)/', $uur, $matches)) return $matches[1];
-	fatal_error('onbekend lesuur '.$uur);
+	if (config('LESUUR_FORMAT') == 'standaard') {
+		if (preg_match('/u(\d+)/', $uur, $matches)) return $matches[1];
+	} else if (config('LESUUR_FORMAT') == 'numeriek') {
+		if (preg_match('/(\d+)/', $uur, $matches)) return $matches[1];
+	} else fatal_error('ongeldige waarde van configuratieparameter LESUUR_FORMAT');
+	fatal_error('onbekend lesuur '.$uur.' pas eventueel LESUUR_FORMAT aan');
 }
 
 function get_dag($dag) {
@@ -126,7 +153,7 @@ function cleanup_lesgroepen($lesgroep) {
 	global $stamz;
 	if (preg_match('/(\w+)\.(\w+)/', $lesgroep, $matches)) {
 		if (config('IGNORE_BEFORE_DOT') == 1) return $matches[2];
-		if (isset($stamz[$matches[2]]) && $stamz[$matches[2]] == $matches[1]) return $matches[2];
+		if (isset($stamz[$matches[2]]) && (config('DISABLE_INLEZEN_CATEGORIEEN') == 'true' || $stamz[$matches[2]] == $matches[1])) return $matches[2];
 	}
 
 	return $lesgroep;
@@ -477,7 +504,8 @@ function import_wijzigingen($file_id, $week, $tmp_name, $basis_id) {
 	lock_renew_helper(1);
 
 	// fill stamz array, so stuff like 2A.2A1A can be changed to 2A1A
-	$stamz = mdb2_all_assoc_rekey(<<<EOQ
+	if (config('DISABLE_INLEZEN_CATEGORIEEN') != 'true') {
+		$stamz = mdb2_all_assoc_rekey(<<<EOQ
 SELECT entities.entity_name, entities2.entity_name AS value
 FROM entities
 JOIN grp2grp ON grp2grp.lesgroep_id = entities.entity_id AND grp2grp.file_id_basis = $basis_id
@@ -485,6 +513,15 @@ JOIN entities AS entities2 ON entities2.entity_id = grp2grp.lesgroep2_id AND ent
 WHERE entities.entity_type = %i
 EOQ
 , CATEGORIE, STAMKLAS);
+	} else {
+		$stamz = mdb2_all_assoc_rekey(<<<EOQ
+SELECT entities.entity_name, 1 AS value
+FROM entities
+JOIN grp2grp ON grp2grp.lesgroep_id = entities.entity_id AND grp2grp.file_id_basis = $basis_id
+WHERE entities.entity_type = %i
+EOQ
+, STAMKLAS);
+	}
 
 	// als de roostermakers roosterwijzigingen wissen, dan zou de wijzigingenfile kleiner moeten worden
 	// zermelo doet overwrite zonder truncate, na het wissen van roosterwijzigingen kunnen secties dubbel

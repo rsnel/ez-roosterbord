@@ -93,7 +93,7 @@ EOQ
 	return $les_id;
 }
 
-if (!get_enable_edit()) exit;
+if (!get_enable_edit() || !$_POST['file_id_wijz']) exit;
 
 header('Content-type: text/plain;charset=UTF-8');
 print_r($_POST);

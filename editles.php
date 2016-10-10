@@ -1,5 +1,5 @@
 <? require_once('common.php'); 
-if (!get_enable_edit()) exit;
+if (!get_enable_edit() || !$_GET['file_id_wijz']) exit;
 $row_basis = mdb2_single_assoc("SELECT * FROM files2lessen JOIN lessen USING (les_id) WHERE file_id = %i AND zermelo_id = %i", $_GET['file_id_basis'], $_GET['zid']);
 $row_wijz = mdb2_single_assoc("SELECT * FROM files2lessen JOIN lessen USING (les_id) WHERE file_id = %i AND zermelo_id = %i", $_GET['file_id_wijz'], $_GET['zid']);
 $zermelo_id = mdb2_single_val("SELECT zermelo_id_orig FROM zermelo_ids WHERE zermelo_id = %i", $_GET['zid']);

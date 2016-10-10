@@ -1534,7 +1534,7 @@ if (isset($_GET['debug'])) {
 $row = $result->fetchRow();
 
 $thismonday = getthismonday($safe_week);
-$enable_edit = get_enable_edit($_GET['bw']);
+$enable_edit = get_enable_edit($_GET['bw']) && $wijz['file_id'] != 0;
 $lescounter = 0;
 $betrokkendolo = array();
 ?>

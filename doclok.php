@@ -57,7 +57,7 @@ function compare_entities($a, $b) {
 	return strcmp($a[2], $b[2]);
 }
 usort($entity_ids, 'compare_entities');
-$enable_edit = get_enable_edit();
+$enable_edit = get_enable_edit() && $file_id_wijz != 0;
 $select_doc = array();
 $select_lok = array();
 for ($i = 1; $i <= 5; $i++) {

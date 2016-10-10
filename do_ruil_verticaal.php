@@ -29,6 +29,8 @@ if (!$file_basis) fatal_error("invalid file_id_basis");
 if (isset($_POST['file_id_wijz']) && $_POST['file_id_wijz']) $file_id_wijz = $_POST['file_id_wijz'];
 else $file_id_wijz = 0;
 
+if ($file_id_wijz == 0) exit;
+
 $file_wijz = mdb2_single_assoc("SELECT * FROM files WHERE file_id = %i", $file_id_wijz);
 if (!$file_wijz) fatal_error("invalid file_id_wijz");
 

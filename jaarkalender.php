@@ -43,7 +43,11 @@ EOQ
 
 $safe_id = $row[0];
 if (isset($groepvak[1])) $vak = $groepvak[1];
-else $vak = NULL;
+else if (preg_match('/\.(\w+)\d$/', $groepvak[0], $match)) $vak= $match[1];
+else fatal_error("vak niet gevonden in lesgroepnaam");
+
+$target_vak = mdb2_single_val("SELECT entity_id FROM entities WHERE entity_type = %i AND entity_name = '/%q'", VAK, $vak);
+if (!$target_vak) fatal_error("vak niet gevonden in rooster");
 
 $min_week_id = mdb2_single_val("SELECT MIN(week_id) FROM roosters");
 if ($min_week_id) {
@@ -136,13 +140,26 @@ LEFT JOIN lessen AS s ON s.les_id = s_id
 LEFT JOIN (
 	SELECT * FROM events
 	LEFT JOIN (
-		SELECT event_id, COUNT(lesgroep2_id) tel FROM entities2events
+		SELECT entities2events.event_id, COUNT(lesgroep2_id) tel FROM entities2events
 		LEFT JOIN (
-			SELECT * FROM grp2grp WHERE grp2grp.file_id_basis = $file_id_basis AND grp2grp.lesgroep2_id = $target
-		) AS bla ON bla.lesgroep_id = entity_id 
+			SELECT *
+			FROM grp2grp
+			WHERE grp2grp.file_id_basis = $file_id_basis
+			AND grp2grp.lesgroep2_id = $target
+		) AS bla ON bla.lesgroep_id = entities2events.entity_id 
 		GROUP BY event_id
 	) AS bla USING (event_id)
-	WHERE tel = 1 OR tel IS NULL
+	LEFT JOIN (
+		SELECT entities2events.event_id, COUNT(vak_id) tel2 FROM entities2events
+		JOIN entities AS vakken ON vakken.entity_id = entities2events.entity_id AND vakken.entity_type = %i
+		LEFT JOIN (
+			SELECT vakken.entity_id AS vak_id
+			FROM entities AS vakken
+			WHERE vakken.entity_id = $target_vak
+		) AS bla2 ON bla2.vak_id = entities2events.entity_id
+		GROUP BY event_id
+	) AS bla2 USING (event_id)
+	WHERE (tel = 1 OR tel IS NULL) AND (tel2 = 1 OR tel2 IS NULL)
 ) AS events
 ON 10*(8*events.start_week_id + events.start_dag) + events.start_uur <= 10*(8*{$row['week_id']} + f.dag) + f.uur
 AND 10*(8*events.eind_week_id + events.eind_dag) + events.eind_uur >= 10*(8*{$row['week_id']} + f.dag) + f.uur
@@ -152,7 +169,7 @@ GROUP BY f_zid, wijz
 ) AS bla
 ORDER BY dag, uur, CASE WHEN activiteit = '-' THEN 0 ELSE 1 END
 EOQ
-, $vak);
+, VAK, $vak);
 }
 
 start_html:

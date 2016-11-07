@@ -44,10 +44,12 @@ EOQ;
 $k_stamklassen = mdb2_col(0, $koppel_query, $event_id, STAMKLAS);
 $k_lesgroepen = mdb2_col(0, $koppel_query, $event_id, LESGROEP);
 $k_categorieen = mdb2_col(0, $koppel_query, $event_id, CATEGORIE);
+$k_vakken = mdb2_col(0, $koppel_query, $event_id, VAK);
 
 $count_stamklassen = mdb2_single_val($koppel_count_query,  $event_id, STAMKLAS);
 $count_lesgroepen = mdb2_single_val($koppel_count_query,  $event_id, LESGROEP);
 $count_categorieen = mdb2_single_val($koppel_count_query, $event_id, CATEGORIE);
+$count_vakken = mdb2_single_val($koppel_count_query, $event_id, VAKKEN);
 
 $startweek_options = mdb2_single_val(<<<EOQ
 SELECT CONCAT('<select name="startweek">', GROUP_CONCAT('<option ', IF(week_id = %i, 'selected ', ''), 'value="', week_id, '">', week, '</option>' SEPARATOR ''), '</select>')
@@ -148,6 +150,8 @@ beschrijving: <input type="text" name="beschrijving" value="<? if (isset($event)
 <div id="accordion">
 <h3><a href="#">Categorie&euml;n (<? echo($count_categorieen); ?>)</a></h3>
 <div> <? foreach ($k_categorieen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
+<h3><a href="#">Vakken (<? echo($count_vakken); ?>)</a></h3>
+<div> <? foreach ($k_vakken as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 <!--<h3><a href="#">Stamklassen (<? echo($count_stamklassen); ?>)</a></h3>
 <div> <? foreach ($k_stamklassen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 <h3><a href="#">Lesgroepen (<? echo($count_lesgroepen); ?>)</a></h3>

@@ -132,7 +132,7 @@ while ($row = $weken->fetchRow(MDB2_FETCHMODE_ASSOC)) {
 SELECT * FROM  (
 SELECT
 CONCAT(CASE WHEN f.dag = 1 THEN 'ma' WHEN f.dag = 2 THEN 'di' WHEN f.dag = 3 THEN 'wo' WHEN f.dag = 4 THEN 'do' WHEN f.dag = 5 THEN 'vr' END, f.uur) les,
-IFNULL(GROUP_CONCAT(events.beschrijving), IF(s.dag = 0 OR (f.dag = 1 AND ma = 0) OR (f.dag = 2 AND di = 0) OR (f.dag = 3 AND wo = 0) OR (f.dag = 4 AND do = 0) OR (f.dag = 5 AND vr = 0), 'uitval', '-')) activiteit, (wijz = 1 OR s_zid IS NULL OR s.dag = 0) `show`, f.dag, f.uur
+IFNULL(GROUP_CONCAT(events.beschrijving ORDER BY event_id), IF(s.dag = 0 OR (f.dag = 1 AND ma = 0) OR (f.dag = 2 AND di = 0) OR (f.dag = 3 AND wo = 0) OR (f.dag = 4 AND do = 0) OR (f.dag = 5 AND vr = 0), 'uitval', '-')) activiteit, (wijz = 1 OR s_zid IS NULL OR s.dag = 0) `show`, f.dag, f.uur
 FROM ( $subquery ) AS sub
 JOIN weken ON week_id = {$row['week_id']}
 JOIN lessen AS f ON f.les_id = f_id

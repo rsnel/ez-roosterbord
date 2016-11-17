@@ -144,7 +144,9 @@ case 'Onwijzig':
 	break;
 case 'Opslaan':
 	$oldwijz_les_id =  mdb2_single_val("SELECT les_id FROM files2lessen WHERE zermelo_id = %i AND file_id = %i", $_POST['zid'], $_POST['file_id_wijz']);
-	$les_id = get_les_id($_POST['dag'], $_POST['uur'], $_POST['lesgroepen'], $_POST['vakken'], $_POST['docenten'], $_POST['lokalen'], $_POST['notitie']);
+	// blokkeer het wijzigen van lesgroepen
+	$lesgroepen = mdb2_single_val("SELECT lesgroepen FROM lessen WHERE les_id = %i", $orig_les_id);
+	$les_id = get_les_id($_POST['dag'], $_POST['uur'], $lesgroepen, $_POST['vakken'], $_POST['docenten'], $_POST['lokalen'], $_POST['notitie']);
 	if ($orig_les_id == $les_id) { // er is geen wijziging ten opzichte van basisrooster
 		if ($oldwijz_les_id) {
 			mdb2_exec("DELETE FROM files2lessen WHERE file_id = %i AND zermelo_id = %i", $_POST['file_id_wijz'], $_POST['zid']);

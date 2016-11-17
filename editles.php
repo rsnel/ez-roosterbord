@@ -97,5 +97,6 @@ if (is_array($row_wijz)) {
 <input type="submit" name="submit" value="Onwijzig">
 <input type="submit" name="uitval" disabled value="Uitval">
 </form>
+Opmerking: wijzigingen van de lesgroep worden genegeerd, omdat de export daar stuk van gaat.
 </body>
 </html>

@@ -152,10 +152,10 @@ beschrijving: <input type="text" name="beschrijving" value="<? if (isset($event)
 <div> <? foreach ($k_categorieen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 <h3><a href="#">Vakken (<? echo($count_vakken); ?>)</a></h3>
 <div> <? foreach ($k_vakken as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
-<!--<h3><a href="#">Stamklassen (<? echo($count_stamklassen); ?>)</a></h3>
+<h3><a href="#">Stamklassen (<? echo($count_stamklassen); ?>)</a></h3>
 <div> <? foreach ($k_stamklassen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 <h3><a href="#">Lesgroepen (<? echo($count_lesgroepen); ?>)</a></h3>
-<div> <? foreach ($k_lesgroepen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>-->
+<div> <? foreach ($k_lesgroepen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 </div>
 <input type="submit" name="submit" value="Opslaan">
 <? if (isset($_GET['event_id'])) { ?>

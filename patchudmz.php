@@ -18,7 +18,7 @@ EOQ
 <title>UDMZ patchpagina</title>
 </head>
 <body>
-<h1>WAARSCHUWING: de output is nog niet goed; stamklassen worden altijd weergeveven zonder categorie en Zermelo die kan daar niet altijd mee omgaan</h1>
+<h1>WAARSCHUWING: wijzigingen van lesgroepen worden genegeerd (lokaalwijzigen, docentwijzigingen, vakwijzigingen, uurwijzigingen worden wel geaccepteerd).</h1>
 <h3>Alle roosteruploads</h3>
 <? mdb2_res_table($res_geupload); ?>
 </body>
@@ -86,7 +86,9 @@ while (!feof($fpin)) {
 						echo("$key => {$split[$index]}\n");
 					}*/
 					//print_r($wijzigingen[$split[0]]);
-					$split[$indices['groepen']] = $wijzigingen[$split[0]]['lesgroepen'];
+					/* wijzig lesgroepen NIET, omdat Zermelo niet (altijd) kan omgaan
+					 * met een verwijderde categorie */
+					//$split[$indices['groepen']] = $wijzigingen[$split[0]]['lesgroepen'];
 					$split[$indices['vakken']] = $wijzigingen[$split[0]]['vakken'];
 					$split[$indices['docenten']] = $wijzigingen[$split[0]]['docenten'];
 					$split[$indices['lokalen']] = $wijzigingen[$split[0]]['lokalen'];

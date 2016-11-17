@@ -140,17 +140,18 @@ LEFT JOIN lessen AS s ON s.les_id = s_id
 LEFT JOIN (
 	SELECT * FROM events
 	LEFT JOIN (
-		SELECT entities2events.event_id, COUNT(lesgroep2_id) tel FROM entities2events
+		SELECT entities2events.event_id, COUNT(lesgroep2_id) cats FROM entities2events
+		JOIN entities AS categorieen ON categorieen.entity_id = entities2events.entity_id AND categorieen.entity_type = %i
 		LEFT JOIN (
 			SELECT *
 			FROM grp2grp
 			WHERE grp2grp.file_id_basis = $file_id_basis
 			AND grp2grp.lesgroep2_id = $target
-		) AS bla ON bla.lesgroep_id = entities2events.entity_id 
+		) AS bla ON bla.lesgroep_id = categorieen.entity_id 
 		GROUP BY event_id
 	) AS bla USING (event_id)
 	LEFT JOIN (
-		SELECT entities2events.event_id, COUNT(vak_id) tel2 FROM entities2events
+		SELECT entities2events.event_id, COUNT(vak_id) vakken FROM entities2events
 		JOIN entities AS vakken ON vakken.entity_id = entities2events.entity_id AND vakken.entity_type = %i
 		LEFT JOIN (
 			SELECT vakken.entity_id AS vak_id
@@ -159,7 +160,17 @@ LEFT JOIN (
 		) AS bla2 ON bla2.vak_id = entities2events.entity_id
 		GROUP BY event_id
 	) AS bla2 USING (event_id)
-	WHERE (tel = 1 OR tel IS NULL) AND (tel2 = 1 OR tel2 IS NULL)
+	LEFT JOIN (
+		SELECT entities2events.event_id, COUNT(groep_id) groepen FROM entities2events
+		JOIN entities AS groepen ON groepen.entity_id = entities2events.entity_id AND (groepen.entity_type = %i OR groepen.entity_type = %i)
+		LEFT JOIN (
+			SELECT groepen.entity_id AS groep_id
+			FROM entities AS groepen
+			WHERE groepen.entity_id = $target
+		) AS bla3 ON bla3.groep_id = entities2events.entity_id
+		GROUP BY event_id
+	) AS bla3 USING (event_id)
+	WHERE (cats = 1 OR cats IS NULL) AND (vakken = 1 OR vakken IS NULL) AND (groepen = 1 OR groepen IS NULL)
 ) AS events
 ON 10*(8*events.start_week_id + events.start_dag) + events.start_uur <= 10*(8*{$row['week_id']} + f.dag) + f.uur
 AND 10*(8*events.eind_week_id + events.eind_dag) + events.eind_uur >= 10*(8*{$row['week_id']} + f.dag) + f.uur
@@ -169,7 +180,91 @@ GROUP BY f_zid, wijz
 ) AS bla
 ORDER BY dag, uur, CASE WHEN activiteit = '-' THEN 0 ELSE 1 END
 EOQ
-, VAK, $vak);
+, CATEGORIE, VAK, STAMKLAS, LESGROEP, $vak);
+}
+
+$plans = mdb2_query(<<<EOQ
+        SELECT * FROM plan
+        LEFT JOIN (
+                SELECT entities2plan.plan_id, COUNT(lesgroep2_id) cats FROM entities2plan
+                JOIN entities AS categorieen ON categorieen.entity_id = entities2plan.entity_id AND categorieen.entity_type = %i
+                LEFT JOIN (
+                        SELECT *
+                        FROM grp2grp
+                        WHERE grp2grp.file_id_basis = $file_id_basis
+                        AND grp2grp.lesgroep2_id = $target
+                ) AS bla ON bla.lesgroep_id = categorieen.entity_id
+                GROUP BY plan_id
+        ) AS bla USING (plan_id)
+        LEFT JOIN (
+                SELECT entities2plan.plan_id, COUNT(vak_id) vakken FROM entities2plan
+                JOIN entities AS vakken ON vakken.entity_id = entities2plan.entity_id AND vakken.entity_type = %i
+                LEFT JOIN (
+                        SELECT vakken.entity_id AS vak_id
+                        FROM entities AS vakken
+                        WHERE vakken.entity_id = $target_vak
+                ) AS bla2 ON bla2.vak_id = entities2plan.entity_id
+                GROUP BY plan_id
+        ) AS bla2 USING (plan_id)
+        LEFT JOIN (
+                SELECT entities2plan.plan_id, COUNT(groep_id) groepen FROM entities2plan
+                JOIN entities AS groepen ON groepen.entity_id = entities2plan.entity_id AND (groepen.entity_type = %i OR groepen.entity_type = %i)
+                LEFT JOIN (
+                        SELECT groepen.entity_id AS groep_id
+                        FROM entities AS groepen
+                        WHERE groepen.entity_id = $target
+                ) AS bla3 ON bla3.groep_id = entities2plan.entity_id
+                GROUP BY plan_id
+        ) AS bla3 USING (plan_id)
+        WHERE (cats = 1 OR cats IS NULL) AND (vakken = 1 OR vakken IS NULL) AND (groepen = 1 OR groepen IS NULL)
+	ORDER BY ord
+EOQ
+, CATEGORIE, VAK, STAMKLAS, LESGROEP);
+
+$todo = array();
+$totaalgewicht = 0;
+
+while ($plan = $plans->fetchRow(MDB2_FETCHMODE_ASSOC)) {
+	$totaalgewicht += $plan['gewicht'];
+	$todo[] = array('naam' => $plan['naam'], 'cumul' => $totaalgewicht, 'gewicht' => $plan['gewicht'], 'lessen' => 0);
+}
+//print_r($todo);
+//print_r($totaalgewicht);
+//
+//mdb2_res_table($plans);
+
+function search_index($done, $todo) {
+	if (count($todo) == 0 || $done < 0) return NULL;
+	foreach ($todo as $key => $stuff) {
+		if ($done < $stuff['cumul']) return $key;
+	}
+	fatal_error("impossibru!");
+}
+	
+function search_plan($done, $todo) {
+	$index = search_index($done, $todo);
+	if ($index === NULL) return "";
+	else return $todo[$index]['naam'];
+	/*if (count($todo) == 0 || $done < 0) return "";
+	$ret = $todo[0]['naam'];
+	foreach ($todo as $stuff) {
+		if ($done < $stuff['cumul']) return $stuff['naam'];
+	}
+	return "";*/
+}
+
+function get_index($les, $totaal, $totaalgewicht, $todo) {
+	return search_index($les*$totaalgewicht/$totaal, $todo);
+}
+
+function getplan($les, $totaal, $totaalgewicht, $todo) {
+	$eenheden_per_les = $totaalgewicht/$totaal;
+	//echo("eenheden_per_les=$eenheden_per_les\n");
+	$done = $les*$eenheden_per_les;
+	//echo("done=$done\n");
+	$curr = search_plan($done, $todo);
+	$prev = search_plan(($les - 1)*$eenheden_per_les, $todo);
+	if ($curr != $prev) return "<i>start $curr</i>";
 }
 
 start_html:
@@ -278,8 +373,18 @@ foreach ($data as $key => $value) {
 		if ($lastles == $row[0]) continue;
 		if (!$row[2]) continue;
 		$lastles = $row[0];
-		if ($row[1]  != '-') $uitval++;
-		else $lessen++;
+		if ($row[1]  != '-') {
+			$xtra = "";
+			$uitval++;
+		} else {
+			$idx = get_index($lessen, $totaallessen, $totaalgewicht, $todo);
+			if ($idx !== NULL) {
+				$todo[$idx]['lessen'] += 1;
+			}
+			$xtra = getplan($lessen, $totaallessen, $totaalgewicht, $todo);
+			$lessen++;
+			if ($xtra) $row[1] = $xtra;
+		}
 	?><td class="expand"><? echo($row[0].' '.$row[1]) ?></td><?
 	}
 	//mdb2_res_table($value);
@@ -287,7 +392,8 @@ foreach ($data as $key => $value) {
 }
 ?>
 </table>
-Beschikbaar lessen: <? echo($lessen) ?>, uitval <? echo($uitval) ?>.
+Lessen: beschikbaar <? echo($lessen) ?>, uitval/niet beschikbaar <? echo($uitval) ?>.
+<? foreach ($todo as $stuff) { echo(' '.$stuff['naam'].' '.$stuff['lessen']); } ?>
 </div>
 <? } else if (trim($_GET['q'])) {
 	if (!$select_lijst) {

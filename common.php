@@ -13,7 +13,7 @@ $config_key = isset($_SERVER['EZ_ROOSTERBORD_CONFIG_KEY'])?$_SERVER['EZ_ROOSTERB
 if ($config_key != '') $config_file = 'config_'.$config_key.'.php';
 
 // logging depends on values in the config file, so we report the error 'by hand'
-if (!file_exists($config_file)) { 
+if (!file_exists(dirname(__FILE__).'/'.$config_file)) {
 	echo("error: configfile $config_file does not exist, create it by copying and modifying config.php.test");
 	exit;
 }

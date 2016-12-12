@@ -1,0 +1,43 @@
+diff --git a/index.php b/index.php
+index 12c7283..8b3b4d3 100644
+--- a/index.php
++++ b/index.php
+@@ -75,6 +75,12 @@ function json_output() {
+ 						$row[VAKKEN] = '';
+ 						$type = 'LOKAALRESERVERING';
+ 						if ($row[NOTITIE]) $comment = $row[NOTITIE];
++					} else if (preg_match('/^naar /', $row[NOTITIE])) {
++						$type = 'VERPLAATSTNAAR';
++						$comment = $row[NOTITIE];
++					} else if (preg_match('/^uitval/', $row[NOTITIE])) {
++						$type = 'UITVAL';
++						$comment = $row[NOTITIE];
+ 					} else if (preg_match('/^van /', $row[NOTITIE])) {
+ 						$type = 'VERPLAATSTVAN';
+ 						$comment = $row[NOTITIE];
+@@ -309,6 +315,12 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
+ 						$extra = ' lokaalreservering';
+ 						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.$row[NOTITIE].')';
+ 						else $comment = '(lokaalreservering)';
++					} else if (preg_match('/^uitval/', $row[NOTITIE])) {
++						$extra = ' uitval';
++						$comment = '('.$row[NOTITIE].')';
++					} else if (preg_match('/^naar /', $row[NOTITIE])) {
++						$extra = ' verplaatstnaar';
++						$comment = '('.$row[NOTITIE].')';
+ 					} else if (preg_match('/^van /', $row[NOTITIE])) {
+ 						$extra = ' verplaatstvan';
+ 						$comment = '('.$row[NOTITIE].')';
+@@ -1568,6 +1580,12 @@ $betrokkendolo = array();
+ 						$extra = ' lokaalreservering';
+ 						if ($row[NOTITIE]) $comment = '(<span class="onlyprint">lokaalreservering: </span>'.$row[NOTITIE].')';
+ 						else $comment = '(lokaalreservering)';
++					} else if (preg_match('/^uitval/', $row[NOTITIE])) {
++						$extra = ' uitval';
++						$comment = '('.$row[NOTITIE].')';
++					} else if (preg_match('/^naar /', $row[NOTITIE])) {
++						$extra = ' verplaatstnaar';
++						$comment = '('.$row[NOTITIE].')';
+ 					} else if (preg_match('/^van /', $row[NOTITIE])) {
+ 						$extra = ' verplaatstvan';
+ 						$comment = '('.$row[NOTITIE].')';

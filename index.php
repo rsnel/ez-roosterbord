@@ -445,7 +445,7 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 <? } ?>
 <? } ?>
 </li>
-<li><? echo(make_link2($_GET['q'], 'Desktop versie')); ?></li>
+<li><? echo(str_replace('&amp;dy=', '&amp;y=', make_link2($_GET['q'], 'Desktop versie'))); ?></li>
 </ul>
 </div>
 </div>

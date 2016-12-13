@@ -5,12 +5,6 @@ header('Content-Disposition: inline; filename=log.txt;');
 
 check_roostermaker($_POST['secret']);
 
-function calc_md5($file) {
-	if (!($md5 = md5_file($file)))
-		fatal_error('unable to calc md5sum of file '.$file);
-	return $md5;
-}
-
 function get_file_id($md5, $type, $status) {
 	return mdb2_single_val("SELECT file_id FROM files WHERE file_md5 = '$md5' AND file_type = $type AND file_status = $status");
 }

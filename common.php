@@ -42,6 +42,11 @@ function uploadcomplain($file) {
 	}
 }
 
+function calc_md5($file) {
+	if (!($md5 = md5_file($file))) fatal_error('unable to calc md5sum of file '.$file);
+	return $md5;
+}
+
 // controleer of alle verplichte velden in de configfile aanwezig zijn
 foreach (array('UPLOAD_SECRET', 'DSN', 'DATADIR', 'LOGFILE', 'TIMEZONE',
 		'INTERNAL_IPS', 'SCHOOL_VOLUIT', 'SCHOOL_AFKORTING',

@@ -687,7 +687,7 @@ $zermelo_ids = mdb2_all_assoc_rekey('SELECT zermelo_id_orig, zermelo_id FROM zer
 
 $stamz = array();
 
-function move_upload($bw, $md5, $week) {
+function move_upload($md5) {
 	$new_filename = config('DATADIR').$md5;
 	logit($_FILES['uploadedfile']['name'].' -> '.$md5);
 	if (!move_uploaded_file($_FILES['uploadedfile']['tmp_name'], $new_filename)) {
@@ -714,7 +714,7 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 			mdb2_exec("INSERT INTO files ( file_name, file_md5, file_time, file_type, file_status ) VALUES ( '%q', '$md5', %i, 2, 0 )", $filename, time());
 			$file_id = get_file_id($md5, 2, 0);
 		}
-		$new_filename = move_upload('wijz', $md5, $week);
+		$new_filename = move_upload($md5);
 		import_wijzigingen($file_id, $week, $new_filename, $basis_file_id);
 		$status = mdb2_single_val("SELECT file_status FROM files WHERE file_id = $basis_file_id");
 		if (!$status) fatal_error('de import is fout gegaan, we kunnen deze wijzigingen niet publiceren :(, mail r.snel@ovc.nl');
@@ -750,7 +750,7 @@ if ($_POST['type'] == 'wijz' && preg_match('/^roosterwijzigingen_wk(\d+).txt$/',
 			mdb2_exec("INSERT INTO files ( file_name, file_md5, file_time, file_type, file_status, file_version ) VALUES ( '%q', '$md5', %i, 1, 0, $version )", $filename, time());
 			$file_id = get_file_id($md5, 1, 0);
 		}
-		$new_filename = move_upload('basis', $md5, $week);
+		$new_filename = move_upload($md5);
 		import_basisrooster($file_id, $new_filename);
 		$status = mdb2_single_val("SELECT file_status FROM files WHERE file_id = $file_id");
 		if (!$status) fatal_error('de import is fout gegaan, we kunnen dit rooster niet publiceren :(, mail r.snel@ovc.nl');

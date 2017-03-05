@@ -2,6 +2,8 @@
 
 check_roostermaker($_GET['secret']);
 
+$attachments = array ();
+
 if (isset($_GET['bericht_id'])) {
 	$ber = mdb2_single_assoc(<<<EOQ
 SELECT * FROM berichten WHERE bericht_id = %i
@@ -13,6 +15,7 @@ EOQ
 
 	$defaultfrom = date('Y-m-d', $ber['bericht_visiblefrom']);
 	$defaultuntil = date('Y-m-d', $ber['bericht_visibleuntil']);
+	if (config('ATTACHMENTS') == 'true') $attachments = mdb2_all_assoc_rekey("SELECT * FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i", $bericht_id);
 } else {
 	$bericht_id = 0;
 	$defaultfrom = date('Y-m-d');
@@ -60,10 +63,20 @@ body {
 <script type="text/javascript">
 //<![CDATA[
 $(function(){
+	var filenum = 0;
 	$("#from").datepicker({ dateFormat: 'yy-mm-dd', firstDay: 1 });
 	$("#until").datepicker({ dateFormat: 'yy-mm-dd', firstDay: 1 });
 	$("#accordion").accordion({
 		heightStyle: "content"
+	});
+	$("#addfile").click(function () {
+		filenum++;
+		$("#filelist").append('<li id="filelist' + filenum + '"><input type="file" name="files[]"><a href="#" id="fileverwijder' + filenum + '">verwijder</a></li>');
+		$("#fileverwijder" + filenum).click(function () {
+			$(this).parent().remove();
+			return false;
+		});
+		return false;
 	});
 });
 //]]>
@@ -78,7 +91,7 @@ Speciale opmaak voor inhoud bericht (werkt niet in de titel):
 <li><code><b>[i]</b>italic<b>[/i]</b></code> wordt <i>italic</i></li>
 </ul>
 
-<p><form method="POST" action="do_bericht.php" name="wijzig" accept-charset="UTF-8">
+<p><form method="POST" action="do_bericht.php" name="wijzig" enctype="multipart/form-data" accept-charset="UTF-8">
 titel: <input type="text" name="title" value="<? if (isset($ber)) echo(htmltobb($ber['bericht_title'])) ?>"><br>
 <textarea rows="16" cols="72" name="body"><? if (isset($ber)) echo(htmltobb($ber['bericht_body'])); ?></textarea><br>
 zichtbaar vanaf: <input id="from" name="from" value="<? echo($defaultfrom) ?>"></br>
@@ -93,6 +106,20 @@ zichtbaar tot: <input id="until" name="until" value="<? echo($defaultuntil) ?>">
 <h3><a href="#">Categorie&euml;n (<? echo($count_categorieen); ?>)</a></h3>
 <div> <? foreach ($k_categorieen as $koppeling) echo($koppeling); echo('<br>'); ?> </div>
 </div>
+<? if (config('ATTACHMENTS') == 'true') { ?>
+<h3>Attachments</h3>
+Let op! In principe gebruiken we leerlingnummers en geen namen in documenten die naar buiten gaan. Zorg ervoor dat leerlingen zichzelf makkelijk kunnen vinden, door bijvoorbeeld te sorteren op leerlingnummer en door een bestandsformaat te gebruiken dat makkelijk te openen is, bijvoorbeeld <code>.pdf</code>.
+<ul>
+<? foreach ($attachments as $attachment) { ?>
+<li><? echo($attachment['attachment_filename']) ?>
+<input type="checkbox" name="del-<? echo($attachment['attachment2bericht_id']); ?>" value="delete">verwijderen
+of vervangen door <input type="file" name="file-<? echo($attachment['attachment2bericht_id']); ?>"></li>
+<? } ?>
+</ul>
+<a href="#" id="addfile">voeg attachment toe</a>
+<ul id="filelist">
+</ul>
+<? } ?>
 <input type="submit" name="submit" value="Opslaan">
 <? if (isset($_GET['bericht_id'])) { ?>
 <input type="hidden" name="bericht_id" value="<? echo($_GET['bericht_id']) ?>">

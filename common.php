@@ -47,6 +47,16 @@ function calc_md5($file) {
 	return $md5;
 }
 
+function move_upload($file, $md5) {
+        $new_filename = config('DATADIR').$md5;
+        logit($file['name'].' -> '.$md5);
+        if (!move_uploaded_file($file['tmp_name'], $new_filename)) {
+                logit('unable to store uploaded file for future reference');
+        }
+        return $new_filename;
+}
+
+
 // controleer of alle verplichte velden in de configfile aanwezig zijn
 foreach (array('UPLOAD_SECRET', 'DSN', 'DATADIR', 'LOGFILE', 'TIMEZONE',
 		'INTERNAL_IPS', 'SCHOOL_VOLUIT', 'SCHOOL_AFKORTING',
@@ -111,7 +121,8 @@ $config_info = array(
 	'GEMACHTIGD_EDIT_WIJZ' => 'roostermakers',
 	'HALFSLACHTIGE_TIJDVAKKEN' => 'false',
 	'DISABLE_INLEZEN_CATEGORIEEN' => 'false',
-	'LESUUR_FORMAT' => 'standaard'
+	'LESUUR_FORMAT' => 'standaard',
+	'ATTACHMENTS' => 'false'
 );
 
 // get config from database and set all unconfigured items to default values

@@ -220,6 +220,13 @@ function mdb2_all_ordered_rekey($format) {
         return mdb2_vall(MDB2_FETCHMODE_ORDERED, true, false, false, $format, $args);
 }
 
+function mdb2_all_assoc($format) {
+        $args = func_get_args();
+        array_shift($args);
+
+        return mdb2_vall(MDB2_FETCHMODE_ASSOC, false, true, false, $format, $args);
+}
+
 function mdb2_col($no, $format) {
         $args = func_get_args();
 	array_shift($args); array_shift($args);

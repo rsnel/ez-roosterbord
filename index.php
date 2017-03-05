@@ -25,6 +25,14 @@ function json_finish($json) {
 	exit;
 }
 
+function bericht_get_attachments_json($bericht_id) {
+	if (config('ATTACHMENTS') == 'false') return array ();
+	return mdb2_all_assoc(<<<EOQ
+SELECT CONCAT('<a href="attachments/', attachment2bericht_id, '/') link, attachment_filename filename_htmlenc FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i
+EOQ
+	, $bericht_id);
+}
+
 function json_output() {
         global $result, $safe_week, $default_week, $day_not_given;
         global $link_tail_wowk, $prev_week, $next_week, $link_tail_tail;
@@ -49,6 +57,7 @@ function json_output() {
 			$bericht_out = array (); 
 			$bericht_out['title'] = $bericht['bericht_title'].' ('.$bericht['bericht_entities'].')';
 			$bericht_out['body'] = $bericht['bericht_body'];
+			$bericht_out['attachments'] = bericht_get_attachments_json($bericht['bericht_id']);
 			$berichten_out[] = $bericht_out;
 		} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
 		$json['berichten'] = $berichten_out;
@@ -282,7 +291,9 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 	?><li><div data-role="collapsibleset"><?
 	do {
 		echo('<div data-role="collapsible"><h3><span style="white-space: normal">'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</span></h3>');
-		echo('<p style="white-space: normal">'.$bericht['bericht_body'].'</div>');
+		echo('<p style="white-space: normal">'.$bericht['bericht_body']);
+		echo(bericht_get_attachments($bericht['bericht_id']));
+		echo('</div>');
 	} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
 	?></div></li><? 
 	}
@@ -423,7 +434,9 @@ echo(' '.date('j-n', $thismonday + ($_GET['dy'] - 1)*24*60*60));
 	?><li><div data-role="collapsibleset"><?
 	do {
 		echo('<div '.(!$var?'data-collapsed="false" ':'').'data-role="collapsible"><h3><span style="white-space: normal">'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</span></h3>');
-		echo('<p style="white-space: normal">'.$bericht['bericht_body'].'</div>');
+		echo('<p style="white-space: normal">'.$bericht['bericht_body']);
+		echo(bericht_get_attachments($bericht['bericht_id']));
+		echo('</div>');
 		$var = 1;
 	} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
 	?></div></li><?
@@ -670,13 +683,13 @@ if (!isset($_GET['wk']) || !in_array($_GET['wk'], $weken)) {
 if ($_GET['wk'] == NULL) {
 	// berichten
 	$berichten = mdb2_query(<<<EOQ
-SELECT bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
+SELECT bericht_id, bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
 LEFT JOIN (
 	SELECT bericht_id, GROUP_CONCAT(entity_name ORDER BY entity_name) entities
 	FROM entities2berichten
 	JOIN entities ON entities.entity_id = entities2berichten.entity_id
 	GROUP BY bericht_id
-) AS bla ON bla.bericht_id = berichten.bericht_id
+) AS bla USING(bericht_id)
 WHERE bericht_visibleuntil > {$_SERVER['REQUEST_TIME']}
 AND bericht_visiblefrom <= {$_SERVER['REQUEST_TIME']}
 ORDER BY bericht_update DESC
@@ -807,13 +820,13 @@ if (!($target = $result->fetchRow()) ||
 
 	// berichten
 	$berichten = mdb2_query(<<<EOQ
-SELECT bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
+SELECT bericht_id, bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
 LEFT JOIN (
 	SELECT bericht_id, GROUP_CONCAT(entity_name ORDER BY entity_name) entities
 	FROM entities2berichten
 	JOIN entities ON entities.entity_id = entities2berichten.entity_id
 	GROUP BY bericht_id
-) AS bla ON bla.bericht_id = berichten.bericht_id
+) AS bla USING (bericht_id)
 WHERE bericht_visibleuntil > {$_SERVER['REQUEST_TIME']}
 AND bericht_visiblefrom <= {$_SERVER['REQUEST_TIME']}
 ORDER BY bericht_update DESC
@@ -1262,19 +1275,19 @@ EOQ
 if (($entity_type == LESGROEP || $entity_type == STAMKLAS || $entity_type == CATEGORIE || $entity_type == LEERLING) && $safe_id) { 
 	// berichten
 	$berichten = mdb2_query(<<<EOQ
-SELECT bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
+SELECT bericht_id, bericht_body, bericht_title, IFNULL(bla.entities, 'Allen') bericht_entities FROM berichten
 LEFT JOIN (
 	SELECT bericht_id, GROUP_CONCAT(entity_name ORDER BY entity_name) entities
 	FROM entities2berichten
 	JOIN entities ON entities.entity_id = entities2berichten.entity_id
 	GROUP BY bericht_id
-) AS bla ON bla.bericht_id = berichten.bericht_id
+) AS bla USING (bericht_id)
 JOIN (
 	SELECT DISTINCT berichten.bericht_id
 	FROM berichten
 	LEFT JOIN entities2berichten ON entities2berichten.bericht_id = berichten.bericht_id
 	WHERE entity_id IN ( $safe_id ) OR entity_id IS NULL
-) AS bla2 ON bla2.bericht_id = berichten.bericht_id
+) AS bla2 USING (bericht_id)
 WHERE bericht_visibleuntil > {$_SERVER['REQUEST_TIME']}
 AND bericht_visiblefrom <= {$_SERVER['REQUEST_TIME']}
 ORDER BY bericht_update DESC
@@ -1430,6 +1443,14 @@ function add_lv(&$info, $lesgroepen, $vak) {
 	}
 }
 
+function bericht_get_attachments($bericht_id) {
+	if (config('ATTACHMENTS') == 'false') return '';
+	return '<p>'.mdb2_single_val(<<<EOQ
+SELECT GROUP_CONCAT(CONCAT('<a href="attachments/', attachment2bericht_id, '/">', attachment_filename, ' (v', version, ')')) FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i
+EOQ
+	, $bericht_id);
+}
+
 function show_berichten($entity_type, $entity_multiple, $berichten) { ?>
 <div <? if ($entity_type) { ?>class="noprint" <? } ?>id="accordion">
 <?
@@ -1447,7 +1468,9 @@ function show_berichten($entity_type, $entity_multiple, $berichten) { ?>
 	else {
 		do {
 			echo('<h3><a href="#">'.$bericht['bericht_title'].' ('.$bericht['bericht_entities'].')</a></h3><div class="berichtbody">');
-			echo($bericht['bericht_body'].'</div>');
+			echo($bericht['bericht_body']);
+			echo(bericht_get_attachments($bericht['bericht_id']));
+			echo('</div>');
 		} while ($bericht = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC));
 	}
 

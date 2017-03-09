@@ -28,7 +28,7 @@ function json_finish($json) {
 function bericht_get_attachments_json($bericht_id) {
 	if (config('ATTACHMENTS') == 'false') return array ();
 	return mdb2_all_assoc(<<<EOQ
-SELECT CONCAT('<a href="attachments/', attachment2bericht_id, '/') link, attachment_filename filename_htmlenc FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i
+SELECT CONCAT('attachments/', attachment2bericht_id, '/') uri, attachment_filename filename_htmlenc FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i
 EOQ
 	, $bericht_id);
 }
@@ -1446,7 +1446,7 @@ function add_lv(&$info, $lesgroepen, $vak) {
 function bericht_get_attachments($bericht_id) {
 	if (config('ATTACHMENTS') == 'false') return '';
 	return '<p>'.mdb2_single_val(<<<EOQ
-SELECT GROUP_CONCAT(CONCAT('<a href="attachments/', attachment2bericht_id, '/">', attachment_filename, ' (v', version, ')')) FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i
+SELECT GROUP_CONCAT(CONCAT('<a href="attachments/', attachment2bericht_id, '/">', attachment_filename, ' (v', version, ')</a>')) FROM attachments2berichten JOIN attachments USING (attachment_id) WHERE bericht_id = %i
 EOQ
 	, $bericht_id);
 }

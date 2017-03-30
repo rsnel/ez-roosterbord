@@ -158,7 +158,7 @@ function json_output() {
 			}
 
 			$les['lesgroepen'] = $row[LESGROEPEN];
-			$les['vakken'] = $row[LESGROEPEN];
+			$les['vakken'] = $row[VAKKEN];
 			$les['docenten'] = $row[DOCENTEN];
 			$les['lokalen'] = $row[LOKALEN];
 			$les['status'] = $type;

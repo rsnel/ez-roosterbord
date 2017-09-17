@@ -271,7 +271,7 @@ EOT
 
 		foreach ($entity_ids as $entity_id) add_entities2lessen($entity_id, $les_id);
 	}
-	mdb2_exec("INSERT INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
+	mdb2_exec("INSERT IGNORE INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
 }
 
 function insert_name($id, $firstname, $prefix, $surname, $email = '') {
@@ -474,7 +474,7 @@ EOT
 		if (!checkset($row, 'Les', array('#WijzigComment', 'Dag', 'Uur', 'Vak', 'Grp', 'Doc', 'Lok', 'Tdv', 'IGNORED'))) return;
 
 		// negeer lessen uit een ander tijdvak
-		if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'true' && $row['Tdv'] != $_POST['tijdvak']) continue;
+		if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'true' && !in_array($_POST['tijdvak'], explode(',', $row['Tdv']))) continue;
 
 		// negeer lessen die in het basisrooster op 'UITVAL' staan
 		if (preg_match('/\<UITVAL\>/', $row['IGNORED'])) {

@@ -19,8 +19,8 @@ EOQ
 	echo($filename);
 	if ($filename) {
 		//echo($filename);
-		if (count($info) == 1) header("Location: ".$info[0].'/'.urlencode($filename));
-		else header("Location: ".urlencode($filename));
+		if (count($info) == 1) header("Location: ".$info[0].'/'.rawurlencode($filename));
+		else header("Location: ".rawurlencode($filename));
 		exit;
 	}
 }
@@ -31,13 +31,14 @@ $file = mdb2_single_assoc(<<<EOQ
 SELECT * FROM attachments
 JOIN attachments2berichten USING (attachment_id)
 JOIN berichten USING (bericht_id)
-WHERE attachment_filename = '%q'
+WHERE attachment_filename = '%q' 
 AND attachment2bericht_id = %i 
 AND bericht_visibleuntil > {$_SERVER['REQUEST_TIME']}
 AND bericht_visiblefrom <= {$_SERVER['REQUEST_TIME']}
 EOQ
 , $info[1], $info[0]
 );
+//, urldecode($info[1]), $info[1], $info[0]
 
 //print_r($_GET);
 //print_r($info);
@@ -46,6 +47,8 @@ EOQ
 if (!is_array($file) || count($file) == 0) {
 	http_response_code(404);
 	echo("file not found\n");
+	echo("\$_SERVER['QUERY_STRING']={$_SERVER['QUERY_STRING']}\n");
+	print_r($_GET['name']);
 	print_r($info);
 	exit;
 }

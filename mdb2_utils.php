@@ -8,7 +8,7 @@ function mdb2() {
 	if (isset($mdb2)) return $mdb2;
 
 	$mdb2 = MDB2::connect(config('DSN'));
-	if (MDB2::isError($mdb2)) fatal_error($mdb2->getMessage());
+	if (MDB2::isError($mdb2)) fatal_error($mdb2->getMessage().':'.$mdb2->getUserInfo());
         $mdb2->exec('SET SESSION group_concat_max_len = 65536');
         $mdb2->exec("SET NAMES 'utf8' COLLATE 'utf8_unicode_ci'");
 	return $mdb2;

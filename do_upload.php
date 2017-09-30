@@ -185,7 +185,7 @@ EOQ
 
 // deze functie is tijdelijk toegevoed, omdat zermelo (in haar oneindige
 // wijsheid) in de nieuwe roosterwijzigingen_wk??.txt bestanden voor GROEPEN de '/'
-// als separator gerbruikt, maar voor vakken, docenten een lokalen een spatie
+// als separator gebruikt, maar voor vakken, docenten een lokalen een spatie
 function insert_les_nieuw($zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
 	$dag = ($dag0 == '')?0:get_dag($dag0);
 	$uur = ($uur0 == '')?0:get_uur_udmz($uur0);

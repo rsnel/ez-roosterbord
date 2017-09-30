@@ -183,6 +183,17 @@ EOQ
 	exit;
 }
 
+function update_entwijz_id($file_id, $zermelo_id, $les_id, $notitie) {
+	if (config('STORE_ENTWIJZ_ID') == 'false') return;
+
+	if (!preg_match('/\$entwijz_id=(\d+)$/', $notitie, $matches)) return;
+
+	mdb2_exec(<<<EOQ
+UPDATE files2lessen SET entwijz_id = %i WHERE file_id = %i AND zermelo_id = %i AND les_id = %i
+EOQ
+, $matches[1], $file_id, $zermelo_id, $les_id);
+}
+
 // deze functie is tijdelijk toegevoed, omdat zermelo (in haar oneindige
 // wijsheid) in de nieuwe roosterwijzigingen_wk??.txt bestanden voor GROEPEN de '/'
 // als separator gebruikt, maar voor vakken, docenten een lokalen een spatie
@@ -196,6 +207,7 @@ function insert_les_nieuw($zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $do
 	$lokalen1 = implode(',', $lokalen = explode_and_sort(' ', $lokalen0));
 	// als er een dollarteken in een notitie voorkomt,
 	// gooi het en alles erna (en whitespace ervoor) dan weg
+	$orig_notitie = $notitie;
 	if (($clean = strstr($notitie, '$', true)) !== false) $notitie = trim($clean);
 
 	// we hebben een lock, dus er is geen race condition
@@ -228,6 +240,7 @@ EOT
 		foreach ($entity_ids as $entity_id) add_entities2lessen($entity_id, $les_id);
 	}
 	mdb2_exec("INSERT IGNORE INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
+	update_entwijz_id($file_id, $zermelo_id, $les_id, $orig_notitie);
 }
 
 function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen0, $docenten0, $lokalen0, $file_id, $notitie) {
@@ -240,6 +253,7 @@ function insert_les($separator, $zermelo_id, $dag0, $uur0, $vakken0, $lesgroepen
 	$lokalen1 = implode(',', $lokalen = explode_and_sort($separator, $lokalen0));
 	// als er een dollarteken in een notitie voorkomt,
 	// gooi het en alles erna (en whitespace ervoor) dan weg
+	$orig_notitie = $notitie;
 	if (($clean = strstr($notitie, '$', true)) !== false) $notitie = trim($clean);
 
 	// we hebben een lock, dus er is geen race condition
@@ -272,6 +286,7 @@ EOT
 		foreach ($entity_ids as $entity_id) add_entities2lessen($entity_id, $les_id);
 	}
 	mdb2_exec("INSERT IGNORE INTO files2lessen ( file_id, zermelo_id, les_id ) VALUES ( $file_id, $zermelo_id, $les_id )");
+	update_entwijz_id($file_id, $zermelo_id, $les_id, $orig_notitie);
 }
 
 function insert_name($id, $firstname, $prefix, $surname, $email = '') {

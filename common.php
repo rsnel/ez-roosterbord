@@ -122,7 +122,8 @@ $config_info = array(
 	'HALFSLACHTIGE_TIJDVAKKEN' => 'false',
 	'DISABLE_INLEZEN_CATEGORIEEN' => 'false',
 	'LESUUR_FORMAT' => 'standaard',
-	'ATTACHMENTS' => 'false'
+	'ATTACHMENTS' => 'false',
+	'STORE_ENTWIJZ_ID' => 'false'
 );
 
 // get config from database and set all unconfigured items to default values

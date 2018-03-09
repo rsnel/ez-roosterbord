@@ -351,7 +351,14 @@ function import_basisrooster($file_id, $tmp_name) {
 			logit('geen tijdvak gegeven bij upload');
 			return;
 		} else if (!isset($udmz['Tijdpatroon']['Tijdvak'][$_POST['tijdvak']])) {
-			logit("tijdvak met naam '{$_POST['tijdvak']} niet gevonden in udmz");
+			logit("tijdvak met naam '{$_POST['tijdvak']}' niet gevonden in udmz");
+			return;
+		}
+	} else if (config('HALFSLACHTIGE_TIJDVAKKEN') == 'true') {
+		// bij het uploaden van een UDMZ met maar 1 tijdvak (terwijl HALFSLACHTIGE_TIJDVAKKEN aan staat)
+		// moet het ingevoerde tijdvak corresponderen met het beschikbare tijdvak
+		if (!isset($udmz['Tijdpatroon']['Tijdvak'][$_POST['tijdvak']])) {
+			logit("tijdvak met naam '{$_POST['tijdvak']}' niet gevonden in udmz");
 			return;
 		}
 	}

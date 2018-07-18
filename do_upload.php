@@ -297,7 +297,7 @@ function insert_name($id, $firstname, $prefix, $surname, $email = '') {
         $name .= ' '.$surname;
 
 	if (isset($names[$id])) {
-		if ($name != $names[$id]) {
+		if ($name != $names[$id] && trim($name) != '') {
 			mdb2_exec(<<<EOT
 UPDATE names SET name = '%q', firstname = '%q', prefix = '%q', surname = '%q', email = '%q' WHERE entity_id = $id
 EOT

@@ -547,6 +547,7 @@ aan het roosterbord en de onderstaande data klopt dus mogelijk niet!</h1>
 <? } ?>
 </form>
 </div>
+<? if (config('SINGLE_WEEK_MODE') != 'true') { ?>
 <div class="noprint" style="float: right">
 <form id="select" method="GET" name="basisweek" accept-charset="UTF-8">
 weeknummer:
@@ -596,6 +597,7 @@ echo(($next_week !== NULL)?'<a href="?q='.urlencode($_GET['q']).$link_tail_wowk.
 <? if (isset($_GET['debug'])) { ?><input type="hidden" name="debug" value=""><? } ?>
 </form>
 </div>
+<? } ?>
 <? }
 
 function html_end() {
@@ -1562,6 +1564,15 @@ $lescounter = 0;
 $betrokkendolo = array();
 ?>
 <p><table id="rooster">
+<? if (config('SINGLE_WEEK_MODE') == 'true') { ?>
+<tr><th></th>
+<th>ma</th>
+<th>di</th>
+<th>wo</th>
+<th>do</th>
+<th>vr</th>
+</tr>
+<? } else { ?>
 <tr><th></th>
 <? if ($_GET['dy'] == 1 || $_GET['dy'] == '*') { ?><th>ma <? echo date("j-n", $thismonday)         ?></th><? } ?>
 <? if ($_GET['dy'] == 2 || $_GET['dy'] == '*') { ?><th>di <? echo date("j-n", $thismonday + 86400) ?></th><? } ?>
@@ -1569,6 +1580,7 @@ $betrokkendolo = array();
 <? if ($_GET['dy'] == 4 || $_GET['dy'] == '*') { ?><th>do <? echo date("j-n", $thismonday +259200) ?></th><? } ?>
 <? if ($_GET['dy'] == 5 || $_GET['dy'] == '*') { ?><th>vr <? echo date("j-n", $thismonday +345600) ?></th><? } ?>
 </tr>
+<? } ?>
 <? for ($i = 1; $i <= config('MAX_LESUUR'); $i++) {
 	echo('<tr class="spacer"><td>'.$i.'</td>'."\n");
 	for ($j = 1; $j <= 5; $j++) {
@@ -1770,7 +1782,9 @@ if (isset($betrokkendolo)) {
 }
 ?>
 <span class="onlyprint">Kijk op <? echo(get_baselink()); ?> voor het actuele rooster.</span>
+<? if (config('SINGLE_WEEK_MODE') != 'true') { ?>
 Probeer nu de <a href="?q=<? echo(urlencode($_GET['q'])); ?>&amp;m&amp;c=<? echo($_GET['c']); ?>">mobiele versie</a> van het roosterbord! <? if ($lescounter >= 0) { ?>Er staan <? echo($lescounter) ?> lessen in dit rooster. <a href="doclok.php?<? if ($_GET['dy'] != '*') { ?> dag[]=<? echo(print_dag($_GET['dy'])); ?>&amp;<? } ?>q=<? echo($doclok) ?>&amp;file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[doclok]</a><? } ?> <a href="conflicts.php?file_id_basis=<? echo($basis['file_id']) ?>&amp;file_id_wijz=<? echo($wijz['file_id']); ?>">[conflicts]</a>
+<? } ?>
 </span>
 
 <? html_end(); ?>

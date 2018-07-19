@@ -124,7 +124,7 @@ $config_info = array(
 	'LESUUR_FORMAT' => 'standaard',
 	'ATTACHMENTS' => 'false',
 	'STORE_ENTWIJZ_ID' => 'false',
-	'SINGLE_WEEK_MODUS' => 'false'
+	'SINGLE_WEEK_MODE' => 'false'
 );
 
 // get config from database and set all unconfigured items to default values

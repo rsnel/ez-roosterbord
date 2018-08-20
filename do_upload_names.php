@@ -5,7 +5,7 @@ header('Content-Disposition: inline; filename=log.txt;');
 
 check_roostermaker($_POST['secret']);
 
-uploadcomplain($_FILES['uploadedfile']);
+uploadcomplain($_FILES['uploadedFile']);
 
 if ($_FILES['uploadedFile']['size'] == 0) fatal_error('file with no content uploaded, impossible!');
 

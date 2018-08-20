@@ -154,6 +154,13 @@ zijn, maximale grootte <? echo $upload_mb ?>MB.<br>
 </form>
 <? } ?>
 
+<h3>Upload namen van leerlingen (tab gescheiden TXT export uit Leerlingdomein)</h3>
+<p><form enctype="multipart/form-data" action="do_upload_names.php" method="POST" accept-charset="UTF-8">
+<input type="file" name="uploadedFile"><br>
+<input type="hidden" name="secret" value="<? echo(config('UPLOAD_SECRET')); ?>">
+<input type="submit" value="Upload">
+</form>
+
 <h3>Berichten</h3>
 <p><a href="bericht.php?secret=<? echo($_GET['secret']) ?>">nieuw bericht toevoegen</a>
 <? $row = $berichten->fetchRow(MDB2_FETCHMODE_ASSOC); 

@@ -24,7 +24,7 @@ if (($row[2] != STAMKLAS || count($groepvak) == 1)  && $row[2] != LESGROEP) {
 	$file_id = mdb2_single_val(<<<EOQ
 SELECT file_id FROM $roosterdb.files
 WHERE file_type = 1 AND file_status = 1
-ORDER BY file_version DESC
+ORDER BY file_version, file_time DESC
 LIMIT 1
 EOQ
 );

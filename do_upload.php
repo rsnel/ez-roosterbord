@@ -585,7 +585,7 @@ EOQ
 
 			if ($max < 2 || $atoms[2] == '') { // lesuitval
 				//logit("lesuitval {$atoms[1]}");
-				if (!preg_match('/^([a-z]{2}) (u\d+)$/', $old[2], $matches)) {
+				if (!preg_match('/^([a-z]{2}) (u?\d+)$/', $old[2], $matches)) {
 					logit("ongeldig format voor 'dag uur'-veld in wijzigingen file: {$old[2]}");
 					continue;
 				}
@@ -607,7 +607,7 @@ EOQ
 
 				if ($atoms[1] != '') {
 					//er is een oude les
-					if (!preg_match('/^([a-z]{2}) (u\d+)$/', $old[2], $matches)) {
+					if (!preg_match('/^([a-z]{2}) (u?\d+)$/', $old[2], $matches)) {
 						logit("ongeldig format voor 'dag uur'-veld in wijzigingen file: {$old[2]}");
 						continue;
 					}
@@ -621,7 +621,7 @@ EOQ
 					//echo('zermelo_id = '.find_les('/', $dag, $uur, $old[1], $old[0], $old[3], $old[4], $basis_id)."\n");
 				}
 
-				if (!preg_match('/^([a-z]{2}) (u\d+)$/', $new[2], $matches)) {
+				if (!preg_match('/^([a-z]{2}) (u?\d+)$/', $new[2], $matches)) {
 					logit("ongeldig format voor 'dag uur'-veld in wijzigingen file: {$old[2]}");
 					continue;
 				}

@@ -636,6 +636,11 @@ $PID = getmypid();
 
 /* een gebruiker wil kennelijk het rooster zien.... */
 
+if (($logdb = config('TRACE_SESSION_LOG')) !== "0") {
+	mdb2_exec("INSERT INTO `$logdb`.session_log ( auth_user, request_uri ) VALUES ( '%q', '%q' )", $_SERVER['PHP_AUTH_USER'], $_SERVER['REQUEST_URI']);
+	//echo("log");
+}
+
 $min_week_id = mdb2_single_val("SELECT MIN(week_id) FROM roosters");
 if ($min_week_id) {
 	$res = mdb2_query("SELECT week FROM weken WHERE week_id >= $min_week_id ORDER BY week_id");

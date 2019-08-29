@@ -44,6 +44,12 @@ EOQ
 <script type="text/javascript" src="js/jquery-1.11.1.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui-1.10.4.custom.min.js"></script>
 <script type="text/javascript" src="js/jquery.iframe-post-form.js"></script>
+<link rel="icon" sizes="192x192" href="icon-hires.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
+<link rel="shortcut icon" href="zermelo_zoom.ico">
 </head>
 <body>
 <div id="content">

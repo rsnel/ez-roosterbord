@@ -344,7 +344,7 @@ $(function() {
 <div class="noprint">
 <form>
 <input type="submit" value="Zoek">
-<input id="box" type="text" name="q"> (bijvoorbeeld <code>6V.wisB2</code> of <code>6V1/entl</code>)
+<input id="box" type="text" name="q"> (bijvoorbeeld <code>6V.wisB2</code>, <code>6V1/entl</code> of SNEL)
 </form>
 </div>
 <? if ($target) { ?>

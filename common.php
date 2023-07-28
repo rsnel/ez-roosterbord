@@ -283,10 +283,10 @@ function cleanup_magic_quotes(&$array) {
 	}
 }
 
-if (get_magic_quotes_gpc()) {
-	if (isset($_GET)) cleanup_magic_quotes($_GET);
-	if (isset($_POST)) cleanup_magic_quotes($_POST);
-}
+//if (get_magic_quotes_gpc()) {
+//	if (isset($_GET)) cleanup_magic_quotes($_GET);
+//	if (isset($_POST)) cleanup_magic_quotes($_POST);
+//}
 
 /*
 function logit_r($data, $indent = '') {
